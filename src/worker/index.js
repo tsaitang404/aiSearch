@@ -1,8 +1,8 @@
 /**
- * Cloudflare Worker for AI Search - 单Worker架构
+ * Cloudflare Worker for AI Chat - 单Worker架构
  * 同时提供前端页面和API服务
- * @version 1.0.0
- * @author AI Search Team
+ * @version 2.0.0
+ * @author AI Chat Team
  */
 
 // 配置常量
@@ -29,7 +29,7 @@ const HTML_CONTENT = `<!DOCTYPE html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Search 智能搜索</title>
+    <title>AI Chat 智能对话</title>
     <style>
         /* 基本样式设置 */
         * {
@@ -40,318 +40,579 @@ const HTML_CONTENT = `<!DOCTYPE html>
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background-color: #f5f7fa;
-        }
-
-        .container {
-            max-width: 900px;
-            margin: 40px auto;
-            padding: 20px;
-        }
-
-        h1 {
-            text-align: center;
-            margin-bottom: 30px;
-            color: #1e40af;
-        }
-
-        h2, h3 {
-            margin-bottom: 15px;
-            color: #1e40af;
-        }
-
-        /* 搜索区域样式 */
-        .search-container {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
             display: flex;
             flex-direction: column;
-            gap: 15px;
-            margin-bottom: 30px;
         }
 
-        textarea {
-            padding: 15px;
-            border: 1px solid #d1d5db;
-            border-radius: 8px;
-            font-size: 16px;
-            min-height: 120px;
-            resize: vertical;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            outline: none;
-            transition: border-color 0.3s;
-        }
-
-        textarea:focus {
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-        }
-
-        button {
-            padding: 12px 20px;
-            background-color: #2563eb;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        button:hover {
-            background-color: #1d4ed8;
-        }
-
-        button:disabled {
-            background-color: #93c5fd;
-            cursor: not-allowed;
-        }
-
-        /* 选项区域样式 */
-        .options-container {
-            background-color: #fff;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 30px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-
-        .toggle-options {
-            color: #3b82f6;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: normal;
-        }
-
-        .options-panel {
-            margin-top: 15px;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 15px;
-        }
-
-        .option-group {
+        /* 顶部导航栏 */
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 15px 20px;
             display: flex;
-            flex-direction: column;
-            gap: 5px;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
 
-        .option-group label {
-            font-size: 14px;
-            font-weight: 500;
-            color: #4b5563;
+        .header h1 {
+            color: #1e40af;
+            font-size: 24px;
+            font-weight: 600;
         }
 
-        .option-group input, .option-group select {
-            padding: 8px 12px;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            font-size: 14px;
-        }
-
-        .option-group input[type="range"] {
-            padding: 0;
-        }
-
-        /* 模型状态显示样式 */
-        .model-status {
-            margin-top: 4px;
-            padding: 2px 6px;
-            background-color: #f3f4f6;
-            border-radius: 3px;
-            display: inline-block;
-        }
-
-        /* 结果区域样式 */
-        .results-container {
-            background-color: #fff;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-
-        .answer-container {
-            background-color: #f0f9ff;
-            border-left: 4px solid #3b82f6;
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 0 8px 8px 0;
-            line-height: 1.7;
-        }
-
-        .sources-container {
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid #e5e7eb;
-        }
-
-        .sources-container ul {
-            list-style: none;
-            margin-left: 10px;
-        }
-
-        .sources-container li {
-            padding: 8px 0;
-            font-size: 14px;
-            color: #4b5563;
-            display: flex;
-            align-items: flex-start;
-        }
-
-        .sources-container li:before {
-            content: "•";
-            color: #3b82f6;
-            font-weight: bold;
-            margin-right: 10px;
-        }
-
-        /* 模型信息显示 */
-        .model-info {
-            background-color: #f0f9ff;
-            border: 1px solid #0ea5e9;
-            border-radius: 6px;
-            padding: 8px 12px;
-            margin-bottom: 15px;
-            font-size: 14px;
+        .model-indicator {
             display: flex;
             align-items: center;
             gap: 8px;
+            font-size: 14px;
+            color: #64748b;
         }
 
-        .model-label {
-            font-weight: 500;
-            color: #0369a1;
-        }
-
-        .model-name {
-            background-color: #0ea5e9;
+        .model-badge {
+            background: #3b82f6;
             color: white;
-            padding: 2px 8px;
-            border-radius: 4px;
+            padding: 4px 8px;
+            border-radius: 12px;
             font-size: 12px;
             font-weight: 500;
         }
 
-        .model-name.fallback {
-            background-color: #f59e0b;
+        .model-badge.fallback {
+            background: #f59e0b;
+        }
+
+        /* 设置按钮 */
+        .settings-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            color: #64748b;
+            transition: all 0.2s;
+        }
+
+        .settings-btn:hover {
+            background: rgba(0, 0, 0, 0.1);
+            color: #1e40af;
+        }
+
+        /* 聊天容器 */
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+            padding: 0 20px;
+        }
+
+        /* 聊天消息区域 */
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* 消息样式 */
+        .message {
+            display: flex;
+            gap: 12px;
+            max-width: 80%;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .message.assistant {
+            align-self: flex-start;
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .message.user .message-avatar {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .message.assistant .message-avatar {
+            background: #10b981;
+            color: white;
+        }
+
+        .message-content {
+            background: white;
+            padding: 12px 16px;
+            border-radius: 18px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            position: relative;
+            line-height: 1.5;
+        }
+
+        .message.user .message-content {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .message.assistant .message-content {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+        }
+
+        /* 消息时间戳 */
+        .message-time {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 4px;
+            text-align: right;
+        }
+
+        .message.assistant .message-time {
+            text-align: left;
+        }
+
+        /* 来源信息 */
+        .message-sources {
+            margin-top: 8px;
+            font-size: 12px;
+            color: #64748b;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 8px;
+        }
+
+        .message-sources ul {
+            list-style: none;
+            margin: 4px 0 0 0;
+        }
+
+        .message-sources li {
+            padding: 2px 0;
+            position: relative;
+            padding-left: 12px;
+        }
+
+        .message-sources li:before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: #3b82f6;
+        }
+
+        /* 输入区域 */
+        .chat-input-container {
+            padding: 20px 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+
+        .chat-input-wrapper {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+        }
+
+        .chat-input {
+            flex: 1;
+            border: 2px solid #e2e8f0;
+            border-radius: 20px;
+            padding: 12px 16px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.2s;
+            resize: none;
+            min-height: 44px;
+            max-height: 120px;
+            overflow-y: auto;
+            font-family: inherit;
+        }
+
+        .chat-input:focus {
+            border-color: #3b82f6;
+        }
+
+        .send-btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            flex-shrink: 0;
+            font-size: 18px;
+        }
+
+        .send-btn:hover:not(:disabled) {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+
+        .send-btn:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
         }
 
         /* 加载指示器 */
-        .loading {
-            display: flex;
-            flex-direction: column;
+        .typing-indicator {
+            display: none;
             align-items: center;
-            justify-content: center;
-            padding: 20px;
+            gap: 12px;
+            padding: 20px 0;
         }
 
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid rgba(59, 130, 246, 0.2);
+        .typing-indicator.show {
+            display: flex;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
-            border-top-color: #3b82f6;
-            animation: spin 1s ease-in-out infinite;
-            margin-bottom: 15px;
+            background: #94a3b8;
+            animation: typing 1.5s ease-in-out infinite;
         }
 
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+                opacity: 0.4;
+            }
+            30% {
+                transform: translateY(-10px);
+                opacity: 1;
             }
         }
 
-        /* 辅助类 */
+        /* 设置面板 */
+        .settings-panel {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 400px;
+            height: 100%;
+            background: white;
+            box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);
+            transition: right 0.3s ease;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .settings-panel.show {
+            right: 0;
+        }
+
+        .settings-header {
+            padding: 20px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .settings-content {
+            padding: 20px;
+        }
+
+        .setting-group {
+            margin-bottom: 24px;
+        }
+
+        .setting-group label {
+            display: block;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+
+        .setting-group input,
+        .setting-group select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .setting-group input[type="range"] {
+            margin: 8px 0;
+        }
+
+        .range-value {
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .model-status {
+            margin-top: 8px;
+            font-size: 12px;
+            color: #64748b;
+            padding: 4px 8px;
+            background: #f3f4f6;
+            border-radius: 4px;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .settings-panel {
+                width: 100%;
+                right: -100%;
+            }
+            
+            .message {
+                max-width: 90%;
+            }
+            
+            .header {
+                padding: 12px 16px;
+            }
+            
+            .chat-container {
+                padding: 0 16px;
+            }
+        }
+
+        /* 隐藏类 */
         .hidden {
-            display: none;
+            display: none !important;
+        }
+
+        /* 欢迎消息 */
+        .welcome-message {
+            text-align: center;
+            padding: 40px 20px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .welcome-message h2 {
+            color: white;
+            margin-bottom: 10px;
+        }
+
+        .welcome-message p {
+            opacity: 0.9;
+        }
+
+        /* 设置覆盖层 */
+        .settings-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .settings-overlay.show {
+            opacity: 1;
+            visibility: visible;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>AI Search 智能搜索</h1>
-        <div class="search-container">
-            <textarea id="queryInput" placeholder="输入您的问题..."></textarea>
-            <button id="submitBtn">提交查询</button>
+    <div class="header">
+        <h1>AI Chat 智能对话</h1>
+        <div class="model-indicator">
+            <span>当前模型:</span>
+            <span class="model-badge" id="currentModelBadge">AutoRAG</span>
         </div>
-        
-        <div class="options-container">
-            <h3>高级选项 <span class="toggle-options">(展开)</span></h3>
-            <div class="options-panel hidden">
-                <div class="option-group">
-                    <label for="useAutoRAG">使用AutoRAG:</label>
-                    <select id="useAutoRAG">
-                        <option value="true">是 (优先使用AutoRAG)</option>
-                        <option value="false">否 (直接使用回落模型)</option>
-                    </select>
-                </div>
-                <div class="option-group">
-                    <label for="fallbackModel">回落模型选择:</label>
-                    <select id="fallbackModel">
-                        <option value="@cf/meta/llama-2-7b-chat-int8">Llama 2 7B (默认)</option>
-                        <option value="@cf/mistral/mistral-7b-instruct-v0.1">Mistral 7B Instruct</option>
-                        <option value="@cf/meta/llama-2-7b-chat-fp16">Llama 2 7B FP16</option>
-                        <option value="@cf/microsoft/phi-2">Microsoft Phi-2</option>
-                        <option value="@cf/qwen/qwen1.5-0.5b-chat">Qwen 1.5 0.5B Chat</option>
-                        <option value="@cf/qwen/qwen1.5-1.8b-chat">Qwen 1.5 1.8B Chat</option>
-                        <option value="@cf/qwen/qwen1.5-7b-chat-awq">Qwen 1.5 7B Chat AWQ</option>
-                    </select>
-                </div>
-                <div class="option-group">
-                    <label for="maxTokens">最大生成令牌数:</label>
-                    <input type="number" id="maxTokens" value="500" min="1" max="2000">
-                </div>
-                <div class="option-group">
-                    <label for="temperature">温度 (创造性):</label>
-                    <input type="range" id="temperature" min="0" max="1" step="0.1" value="0.7">
-                    <span id="temperatureValue">0.7</span>
-                </div>
-                <div class="option-group">
-                    <label for="retrievalMode">检索模式:</label>
-                    <select id="retrievalMode">
-                        <option value="hybrid">混合检索</option>
-                        <option value="semantic">语义检索</option>
-                        <option value="keyword">关键词检索</option>
-                    </select>
-                </div>
+        <button class="settings-btn" id="settingsBtn" title="设置">
+            ⚙️
+        </button>
+    </div>
+
+    <div class="chat-container">
+        <div class="chat-messages" id="chatMessages">
+            <div class="welcome-message">
+                <h2>欢迎使用 AI Chat</h2>
+                <p>我是您的智能助手，可以回答问题、协助思考和提供信息。有什么我可以帮您的吗？</p>
             </div>
         </div>
-        
-        <div class="results-container hidden" id="resultsContainer">
-            <h2>查询结果</h2>
-            <div class="model-info" id="modelInfo">
-                <span class="model-label">使用模型:</span>
-                <span class="model-name" id="currentModel">AutoRAG</span>
+
+        <div class="typing-indicator" id="typingIndicator">
+            <div class="message-avatar">
+                <span>AI</span>
             </div>
-            <div class="loading hidden" id="loadingIndicator">
-                <div class="spinner"></div>
-                <p>正在处理您的查询...</p>
+            <div class="typing-dots">
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
             </div>
-            <div class="answer-container" id="answerContainer"></div>
-            <div class="sources-container" id="sourcesContainer">
-                <h3>参考来源</h3>
-                <ul id="sourcesList"></ul>
+            <span>正在思考中...</span>
+        </div>
+
+        <div class="chat-input-container">
+            <div class="chat-input-wrapper">
+                <textarea id="chatInput" class="chat-input" placeholder="输入您的消息..." rows="1"></textarea>
+                <button id="sendBtn" class="send-btn" title="发送">
+                    ➤
+                </button>
             </div>
         </div>
     </div>
-    
+
+    <!-- 设置覆盖层 -->
+    <div class="settings-overlay" id="settingsOverlay"></div>
+
+    <!-- 设置面板 -->
+    <div class="settings-panel" id="settingsPanel">
+        <div class="settings-header">
+            <h3>对话设置</h3>
+            <button class="settings-btn" id="closeSettingsBtn" title="关闭">
+                ✕
+            </button>
+        </div>
+        <div class="settings-content">
+            <div class="setting-group">
+                <label for="useAutoRAG">使用AutoRAG:</label>
+                <select id="useAutoRAG">
+                    <option value="true">是 (优先使用AutoRAG)</option>
+                    <option value="false">否 (直接使用回落模型)</option>
+                </select>
+            </div>
+            <div class="setting-group">
+                <label for="fallbackModel">回落模型:</label>
+                <select id="fallbackModel">
+                    <option value="@cf/meta/llama-2-7b-chat-int8">Llama 2 7B (默认)</option>
+                </select>
+                <div class="model-status">
+                    正在加载模型列表...
+                </div>
+            </div>
+            <div class="setting-group">
+                <label for="temperature">创造性 (Temperature):</label>
+                <input type="range" id="temperature" min="0" max="1" step="0.1" value="0.7">
+                <div class="range-value">当前值: <span id="temperatureValue">0.7</span></div>
+            </div>
+            <div class="setting-group">
+                <label for="maxTokens">最大生成长度:</label>
+                <input type="number" id="maxTokens" value="500" min="1" max="2000">
+            </div>
+        </div>
+    </div>
+
     <script>
         // 配置 - 使用当前页面域名的API
         const WORKER_API_URL = window.location.origin + "/api";
+        
+        // DOM元素 (在DOMContentLoaded中初始化)
+        let chatMessages, chatInput, sendBtn, typingIndicator, currentModelBadge;
+        let settingsBtn, settingsPanel, settingsOverlay, closeSettingsBtn;
+        let fallbackModelSelect, temperatureSlider, temperatureValue;
+        let useAutoRAGSelect, maxTokensInput;
+        
+        // 聊天历史
+        let chatHistory = [];
 
-        // DOM元素
-        const queryInput = document.getElementById('queryInput');
-        const submitBtn = document.getElementById('submitBtn');
-        const resultsContainer = document.getElementById('resultsContainer');
-        const loadingIndicator = document.getElementById('loadingIndicator');
-        const answerContainer = document.getElementById('answerContainer');
-        const sourcesList = document.getElementById('sourcesList');
-        const toggleOptions = document.querySelector('.toggle-options');
-        const optionsPanel = document.querySelector('.options-panel');
-        const temperatureSlider = document.getElementById('temperature');
-        const temperatureValue = document.getElementById('temperatureValue');
-        const fallbackModelSelect = document.getElementById('fallbackModel');
+        // 页面初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            // 初始化DOM元素
+            chatMessages = document.getElementById('chatMessages');
+            chatInput = document.getElementById('chatInput');
+            sendBtn = document.getElementById('sendBtn');
+            typingIndicator = document.getElementById('typingIndicator');
+            currentModelBadge = document.getElementById('currentModelBadge');
+            settingsBtn = document.getElementById('settingsBtn');
+            settingsPanel = document.getElementById('settingsPanel');
+            settingsOverlay = document.getElementById('settingsOverlay');
+            closeSettingsBtn = document.getElementById('closeSettingsBtn');
+            fallbackModelSelect = document.getElementById('fallbackModel');
+            temperatureSlider = document.getElementById('temperature');
+            temperatureValue = document.getElementById('temperatureValue');
+            useAutoRAGSelect = document.getElementById('useAutoRAG');
+            maxTokensInput = document.getElementById('maxTokens');
+            
+            // 加载可用模型
+            loadAvailableModels();
+            
+            // 设置面板事件
+            if (settingsBtn) {
+                settingsBtn.addEventListener('click', () => {
+                    settingsPanel.classList.add('show');
+                    settingsOverlay.classList.add('show');
+                });
+            }
+
+            if (closeSettingsBtn) {
+                closeSettingsBtn.addEventListener('click', closeSettings);
+            }
+            
+            if (settingsOverlay) {
+                settingsOverlay.addEventListener('click', closeSettings);
+            }
+
+            // 温度滑块更新显示值
+            if (temperatureSlider) {
+                temperatureSlider.addEventListener('input', () => {
+                    temperatureValue.textContent = temperatureSlider.value;
+                });
+            }
+
+            // 发送按钮事件
+            if (sendBtn) {
+                sendBtn.addEventListener('click', () => {
+                    sendMessage();
+                });
+            }
+            
+            // 输入框事件
+            if (chatInput) {
+                chatInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        sendMessage();
+                    }
+                });
+
+                // 自动调整输入框高度
+                chatInput.addEventListener('input', autoResize);
+            }
+        });
 
         // 动态获取可用模型
         async function loadAvailableModels() {
@@ -374,21 +635,12 @@ const HTML_CONTENT = `<!DOCTYPE html>
                     
                     console.log('已加载 ' + Object.keys(data.models).length + ' 个可用模型 (' + data.source + ')');
                     
-                    // 添加模型获取状态显示
-                    const modelStatus = document.createElement('small');
-                    modelStatus.style.color = '#666';
-                    modelStatus.style.fontSize = '12px';
-                    modelStatus.textContent = data.source === 'dynamic' ? 
-                        '✅ 已动态检测可用模型' : '⚠️ 使用预设模型列表';
-                    
-                    // 将状态显示添加到回落模型选择器后面
-                    const modelGroup = fallbackModelSelect.parentElement;
-                    const existingStatus = modelGroup.querySelector('.model-status');
-                    if (existingStatus) {
-                        existingStatus.remove();
+                    // 更新模型状态显示
+                    const modelStatus = document.querySelector('.model-status');
+                    if (modelStatus) {
+                        modelStatus.textContent = data.source === 'dynamic' ? 
+                            '✅ 已动态检测可用模型' : '⚠️ 使用预设模型列表';
                     }
-                    modelStatus.className = 'model-status';
-                    modelGroup.appendChild(modelStatus);
                     
                 } else if (data.error) {
                     console.warn('获取模型列表失败:', data.error);
@@ -399,238 +651,198 @@ const HTML_CONTENT = `<!DOCTYPE html>
             }
         }
 
-        // 事件监听器
-        document.addEventListener('DOMContentLoaded', () => {
-            // 加载可用模型
-            loadAvailableModels();
-            
-            // 选项面板切换
-            toggleOptions.addEventListener('click', () => {
-                optionsPanel.classList.toggle('hidden');
-                toggleOptions.textContent = optionsPanel.classList.contains('hidden') ? '(展开)' : '(收起)';
-            });
+        function closeSettings() {
+            settingsPanel.classList.remove('show');
+            settingsOverlay.classList.remove('show');
+        }
 
-            // 温度滑块更新显示值
-            temperatureSlider.addEventListener('input', () => {
-                temperatureValue.textContent = temperatureSlider.value;
-            });
+        function autoResize() {
+            chatInput.style.height = 'auto';
+            chatInput.style.height = Math.min(chatInput.scrollHeight, 120) + 'px';
+        }
 
-            // 提交查询
-            submitBtn.addEventListener('click', handleSubmit);
-            queryInput.addEventListener('keydown', (e) => {
-                if (e.ctrlKey && e.key === 'Enter') {
-                    handleSubmit();
-                }
-            });
-        });
-
-        // 处理查询提交
-        async function handleSubmit() {
-            const query = queryInput.value.trim();
-            
-            if (!query) {
-                alert('请输入查询内容');
+        // 发送消息
+        async function sendMessage() {
+            if (!chatInput) {
                 return;
             }
             
-            // 获取高级选项
-            const options = {
-                use_autorag: document.getElementById('useAutoRAG').value === 'true',
-                max_tokens: parseInt(document.getElementById('maxTokens').value),
-                temperature: parseFloat(document.getElementById('temperature').value),
-                retrieval_mode: document.getElementById('retrievalMode').value,
-                fallback_model: document.getElementById('fallbackModel').value
-            };
+            const message = chatInput.value.trim();
             
-            // 显示加载状态
-            setLoading(true);
-            
-            try {
-                const response = await fetchAutoRagResults(query, options);
-                displayResults(response);
-            } catch (error) {
-                handleError(error);
-            } finally {
-                setLoading(false);
+            if (!message) {
+                return;
             }
-        }
-
-        // 调用AutoRAG API
-        async function fetchAutoRagResults(query, options) {
+            
+            // 添加用户消息
+            addMessage('user', message);
+            
+            // 清空输入框并重置高度
+            chatInput.value = '';
+            chatInput.style.height = '44px';
+            
+            // 禁用发送按钮
+            sendBtn.disabled = true;
+            
+            // 显示打字指示器
+            showTypingIndicator();
+            
             try {
+                // 获取设置
+                const options = {
+                    use_autorag: useAutoRAGSelect ? useAutoRAGSelect.value === 'true' : true,
+                    fallback_model: fallbackModelSelect ? fallbackModelSelect.value : '@cf/meta/llama-2-7b-chat-int8',
+                    temperature: temperatureSlider ? parseFloat(temperatureSlider.value) : 0.7,
+                    max_tokens: maxTokensInput ? parseInt(maxTokensInput.value) : 500
+                };
+                
+                // 调用API
                 const response = await fetch(WORKER_API_URL, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ query, options })
+                    body: JSON.stringify({
+                        query: message,
+                        options: options
+                    })
                 });
-                
+
                 if (!response.ok) {
-                    throw new Error(\`API请求失败: \${response.status} \${response.statusText}\`);
+                    throw new Error('网络请求失败: ' + response.status);
                 }
+
+                const data = await response.json();
                 
-                return await response.json();
+                // 隐藏打字指示器
+                hideTypingIndicator();
+                
+                // 更新当前使用的模型
+                updateCurrentModel(data.model_used);
+                
+                // 添加AI回复
+                addMessage('assistant', data.answer || data.response, data.sources);
+                
             } catch (error) {
-                console.error('API请求错误:', error);
-                throw error;
+                console.error('发送消息失败:', error);
+                hideTypingIndicator();
+                addMessage('assistant', '抱歉，我现在无法回复您的消息。请稍后重试。', null, true);
+            } finally {
+                // 启用发送按钮
+                sendBtn.disabled = false;
             }
         }
 
-        // 显示结果
-        function displayResults(data) {
-            // 显示结果容器
-            resultsContainer.classList.remove('hidden');
+        // 添加消息到聊天界面
+        function addMessage(role, content, sources = null, isError = false) {
+            // 移除欢迎消息
+            const welcomeMessage = document.querySelector('.welcome-message');
+            if (welcomeMessage) {
+                welcomeMessage.remove();
+            }
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message ' + role;
             
-            // 显示当前使用的模型
-            const currentModelElement = document.getElementById('currentModel');
-            if (data.model_used) {
-                if (data.model_used === 'autorag') {
-                    currentModelElement.textContent = 'AutoRAG';
-                    currentModelElement.className = 'model-name';
-                } else if (data.model_used === 'mock_autorag') {
-                    currentModelElement.textContent = 'AutoRAG (模拟)';
-                    currentModelElement.className = 'model-name';
-                } else {
-                    // 尝试从下拉选项中获取模型显示名称
-                    const modelOption = fallbackModelSelect.querySelector(\`option[value="\${data.model_used}"]\`);
-                    const displayName = modelOption ? modelOption.textContent : data.model_used.replace('@cf/', '');
-                    
-                    currentModelElement.textContent = displayName;
-                    currentModelElement.className = 'model-name fallback';
-                }
-            } else {
-                currentModelElement.textContent = '未知';
-                currentModelElement.className = 'model-name';
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar';
+            avatar.textContent = role === 'user' ? '您' : 'AI';
+            
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+            
+            if (isError) {
+                messageContent.style.color = '#dc2626';
+                messageContent.style.borderColor = '#fecaca';
+                messageContent.style.background = '#fef2f2';
             }
             
-            // 显示回答
-            if (data.answer || data.response) {
-                answerContainer.innerHTML = formatAnswer(data.answer || data.response);
-            } else {
-                answerContainer.innerHTML = '<p>没有找到相关回答。</p>';
-            }
+            // 处理内容格式化
+            messageContent.innerHTML = formatMessage(content);
             
-            // 显示来源
-            sourcesList.innerHTML = '';
-            if (data.sources && data.sources.length > 0) {
-                data.sources.forEach(source => {
+            // 添加时间戳
+            const timestamp = document.createElement('div');
+            timestamp.className = 'message-time';
+            timestamp.textContent = new Date().toLocaleTimeString('zh-CN', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+            messageContent.appendChild(timestamp);
+            
+            // 添加来源信息
+            if (sources && sources.length > 0 && role === 'assistant') {
+                const sourcesDiv = document.createElement('div');
+                sourcesDiv.className = 'message-sources';
+                sourcesDiv.innerHTML = '<strong>参考来源:</strong>';
+                
+                const sourcesList = document.createElement('ul');
+                sources.forEach(source => {
                     const li = document.createElement('li');
-                    li.textContent = formatSourceItem(source);
+                    li.textContent = source;
                     sourcesList.appendChild(li);
                 });
-            } else if (data.data && data.data.length > 0) {
-                data.data.forEach(item => {
-                    const li = document.createElement('li');
-                    li.textContent = formatSourceItem(item);
-                    sourcesList.appendChild(li);
-                });
+                
+                sourcesDiv.appendChild(sourcesList);
+                messageContent.appendChild(sourcesDiv);
+            }
+            
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(messageContent);
+            
+            chatMessages.appendChild(messageDiv);
+            
+            // 滚动到底部
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            // 更新聊天历史
+            chatHistory.push({
+                role: role,
+                content: content,
+                timestamp: new Date(),
+                sources: sources
+            });
+        }
+
+        // 格式化消息内容
+        function formatMessage(text) {
+            if (!text) return '';
+            
+            // 简单的文本格式化
+            return text.replace(/\\n/g, '<br>');
+        }
+
+        // 显示打字指示器
+        function showTypingIndicator() {
+            typingIndicator.classList.add('show');
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // 隐藏打字指示器
+        function hideTypingIndicator() {
+            typingIndicator.classList.remove('show');
+        }
+
+        // 更新当前模型显示
+        function updateCurrentModel(modelUsed) {
+            if (!modelUsed) return;
+            
+            if (modelUsed === 'autorag') {
+                currentModelBadge.textContent = 'AutoRAG';
+                currentModelBadge.className = 'model-badge';
+            } else if (modelUsed === 'mock_autorag') {
+                currentModelBadge.textContent = 'AutoRAG (模拟)';
+                currentModelBadge.className = 'model-badge';
             } else {
-                sourcesList.innerHTML = '<li>没有提供参考来源</li>';
+                // 尝试从下拉选项中获取模型显示名称
+                const modelOption = fallbackModelSelect.querySelector('option[value="' + modelUsed + '"]');
+                const displayName = modelOption ? modelOption.textContent : modelUsed.replace('@cf/', '');
+                
+                currentModelBadge.textContent = displayName;
+                currentModelBadge.className = 'model-badge fallback';
             }
-
-            // 滚动到结果区域
-            resultsContainer.scrollIntoView({ behavior: 'smooth' });
-        }
-
-        // 格式化回答内容（支持简单Markdown转换）
-        function formatAnswer(text) {
-            // 替换Markdown语法为HTML
-            return text
-                .replace(/\\n\\n/g, '</p><p>')
-                .replace(/\\n/g, '<br>')
-                .replace(/\\*\\*(.*?)\\*\\*/g, '<strong>$1</strong>')
-                .replace(/\\*(.*?)\\*/g, '<em>$1</em>')
-                .replace(/\`\`\`([\\s\\S]*?)\`\`\`/g, '<pre><code>$1</code></pre>')
-                .replace(/\`([^\`]+)\`/g, '<code>$1</code>');
-        }
-
-        // 格式化来源项
-        function formatSourceItem(source) {
-            if (typeof source === 'string') {
-                return source;
-            }
-            
-            // 假设source是一个对象，包含title、url等属性
-            if (source.title) {
-                return \`\${source.title}\${source.url ? ' - ' + source.url : ''}\`;
-            }
-            
-            return JSON.stringify(source);
-        }
-
-        // 设置加载状态
-        function setLoading(isLoading) {
-            submitBtn.disabled = isLoading;
-            loadingIndicator.classList.toggle('hidden', !isLoading);
-            
-            if (isLoading) {
-                answerContainer.innerHTML = '';
-                sourcesList.innerHTML = '';
-            }
-        }
-
-        // 处理错误
-        function handleError(error) {
-            console.error('错误:', error);
-            resultsContainer.classList.remove('hidden');
-            answerContainer.innerHTML = \`
-                <p style="color: #e11d48;">发生错误: \${error.message || '未知错误'}</p>
-                <p>请检查网络连接并重试，或联系管理员。</p>
-            \`;
-            sourcesList.innerHTML = '';
         }
     </script>
 </body>
 </html>`;
-
-// 处理CORS预检请求
-function handleCORS() {
-  return new Response(null, {
-    headers: corsHeaders()
-  });
-}
-
-// 设置CORS头
-function corsHeaders() {
-  return {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization",
-    "Content-Type": "application/json"
-  };
-}
-
-// 辅助函数：获取模型显示名称
-function getModelDisplayName(modelId) {
-  const nameMap = {
-    "@cf/meta/llama-2-7b-chat-int8": "Llama 2 7B Chat (Int8)",
-    "@cf/meta/llama-2-7b-chat-fp16": "Llama 2 7B Chat (FP16)", 
-    "@cf/mistral/mistral-7b-instruct-v0.1": "Mistral 7B Instruct",
-    "@cf/microsoft/phi-2": "Microsoft Phi-2",
-    "@cf/qwen/qwen1.5-0.5b-chat": "Qwen 1.5 0.5B Chat",
-    "@cf/qwen/qwen1.5-1.8b-chat": "Qwen 1.5 1.8B Chat",
-    "@cf/qwen/qwen1.5-7b-chat-awq": "Qwen 1.5 7B Chat (AWQ)",
-    "@cf/qwen/qwen1.5-14b-chat-awq": "Qwen 1.5 14B Chat (AWQ)",
-    "@cf/meta/llama-3-8b-instruct": "Llama 3 8B Instruct",
-    "@cf/meta/llama-3.1-8b-instruct": "Llama 3.1 8B Instruct",
-    "@cf/google/gemma-7b-it": "Google Gemma 7B IT",
-    "@cf/openchat/openchat-3.5-0106": "OpenChat 3.5"
-  };
-  
-  return nameMap[modelId] || modelId.replace('@cf/', '').replace('/', ' ');
-}
-
-// 辅助函数：获取模型分类
-function getModelCategory(modelId) {
-  if (modelId.includes('llama')) return 'Meta Llama';
-  if (modelId.includes('mistral')) return 'Mistral';
-  if (modelId.includes('qwen')) return 'Qwen'; 
-  if (modelId.includes('phi')) return 'Microsoft';
-  if (modelId.includes('gemma')) return 'Google';
-  if (modelId.includes('openchat')) return 'OpenChat';
-  return 'Other';
-}
 
 export default {
   async fetch(request, env, ctx) {
@@ -710,7 +922,7 @@ export default {
                 if (model.available) {
                   availableModels[model.id] = model.name;
                 }
-                console.log(`模型 ${model.id}: ${model.available ? '可用' : '不可用'}`);
+                console.log('模型 ' + model.id + ': ' + (model.available ? '可用' : '不可用'));
               }
             });
 
@@ -789,7 +1001,7 @@ export default {
                 answer.model_used = modelUsed;
                 
               } catch (autoragError) {
-                console.log(`AutoRAG不可用，使用回落模型: ${fallbackModel}`, autoragError.message);
+                console.log('AutoRAG不可用，使用回落模型: ' + fallbackModel, autoragError.message);
                 
                 // AutoRAG失败，使用回落模型
                 modelUsed = fallbackModel;
@@ -797,7 +1009,7 @@ export default {
                   messages: [
                     {
                       role: "system",
-                      content: "你是一个智能搜索助手，请根据用户的查询提供有用的回答。"
+                      content: "你是一个智能聊天助手，请根据用户的问题提供有帮助的回答。保持对话自然、友好。"
                     },
                     {
                       role: "user", 
@@ -811,20 +1023,20 @@ export default {
                 
                 answer = {
                   answer: response.response || "抱歉，无法生成回答",
-                  sources: [`基于${CONFIG.FALLBACK_MODELS[fallbackModel] || fallbackModel}生成的回答`],
+                  sources: ['基于' + (CONFIG.FALLBACK_MODELS[fallbackModel] || fallbackModel) + '生成的回答'],
                   model_used: modelUsed
                 };
               }
             } else {
               // 用户选择直接使用回落模型
-              console.log(`用户选择直接使用回落模型: ${fallbackModel}`);
+              console.log('用户选择直接使用回落模型: ' + fallbackModel);
               modelUsed = fallbackModel;
               
               const response = await env.AI.run(fallbackModel, {
                 messages: [
                   {
                     role: "system",
-                    content: "你是一个智能搜索助手，请根据用户的查询提供有用的回答。"
+                    content: "你是一个智能聊天助手，请根据用户的问题提供有帮助的回答。保持对话自然、友好。"
                   },
                   {
                     role: "user", 
@@ -838,7 +1050,7 @@ export default {
               
               answer = {
                 answer: response.response || "抱歉，无法生成回答",
-                sources: [`基于${CONFIG.FALLBACK_MODELS[fallbackModel] || fallbackModel}生成的回答`],
+                sources: ['基于' + (CONFIG.FALLBACK_MODELS[fallbackModel] || fallbackModel) + '生成的回答'],
                 model_used: modelUsed
               };
             }
@@ -862,7 +1074,7 @@ export default {
           // 如果没有AI绑定，返回模拟数据（用于开发测试）
           console.log("使用模拟数据，查询:", query);
           const mockResponse = {
-            answer: "这是一个模拟的AutoRAG响应。请确保Worker已正确配置AI绑定以使用真实的AutoRAG服务。",
+            answer: "这是一个模拟的AI回复。请确保Worker已正确配置AI绑定以使用真实的AI服务。您的问题是：" + query,
             sources: [
               "模拟数据源 1",
               "模拟数据源 2", 
@@ -892,3 +1104,51 @@ export default {
     return new Response("Not Found", { status: 404 });
   }
 };
+
+// 辅助函数：处理CORS
+function handleCORS() {
+  return new Response(null, {
+    headers: corsHeaders()
+  });
+}
+
+// 设置CORS头
+function corsHeaders() {
+  return {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    "Content-Type": "application/json"
+  };
+}
+
+// 辅助函数：获取模型显示名称
+function getModelDisplayName(modelId) {
+  const nameMap = {
+    "@cf/meta/llama-2-7b-chat-int8": "Llama 2 7B Chat (Int8)",
+    "@cf/meta/llama-2-7b-chat-fp16": "Llama 2 7B Chat (FP16)", 
+    "@cf/mistral/mistral-7b-instruct-v0.1": "Mistral 7B Instruct",
+    "@cf/microsoft/phi-2": "Microsoft Phi-2",
+    "@cf/qwen/qwen1.5-0.5b-chat": "Qwen 1.5 0.5B Chat",
+    "@cf/qwen/qwen1.5-1.8b-chat": "Qwen 1.5 1.8B Chat",
+    "@cf/qwen/qwen1.5-7b-chat-awq": "Qwen 1.5 7B Chat (AWQ)",
+    "@cf/qwen/qwen1.5-14b-chat-awq": "Qwen 1.5 14B Chat (AWQ)",
+    "@cf/meta/llama-3-8b-instruct": "Llama 3 8B Instruct",
+    "@cf/meta/llama-3.1-8b-instruct": "Llama 3.1 8B Instruct",
+    "@cf/google/gemma-7b-it": "Google Gemma 7B IT",
+    "@cf/openchat/openchat-3.5-0106": "OpenChat 3.5"
+  };
+  
+  return nameMap[modelId] || modelId.replace('@cf/', '').replace('/', ' ');
+}
+
+// 辅助函数：获取模型分类
+function getModelCategory(modelId) {
+  if (modelId.includes('llama')) return 'Meta Llama';
+  if (modelId.includes('mistral')) return 'Mistral';
+  if (modelId.includes('qwen')) return 'Qwen'; 
+  if (modelId.includes('phi')) return 'Microsoft';
+  if (modelId.includes('gemma')) return 'Google';
+  if (modelId.includes('openchat')) return 'OpenChat';
+  return 'Other';
+}
