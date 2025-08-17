@@ -9,14 +9,16 @@
 ├── src/
 │   └── worker/         # Cloudflare Worker 代码
 │       └── index.js    # Worker 入口文件 (包含前端和API)
-├── pages/              # 原始前端文件 (仅供参考)
-│   ├── index.html      # 主HTML页面
-│   ├── styles.css      # CSS样式
-│   └── app.js          # 前端JavaScript逻辑
+├── pages/              # 原始前端文件 (仅供参考，已集成到Worker中)
+│   ├── index.html      # 参考：原始HTML结构
+│   ├── styles.css      # 参考：原始CSS样式
+│   └── app.js          # 参考：原始JavaScript逻辑
 ├── wrangler.toml       # Cloudflare Wrangler配置
 ├── package.json        # 项目依赖和脚本
 └── README.md           # 项目说明文档
 ```
+
+> **注意**: `pages/` 目录中的文件仅供参考，实际运行的前端代码已经嵌入到 `src/worker/index.js` 中。
 
 ## 架构特点
 

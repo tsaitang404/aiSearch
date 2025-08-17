@@ -1,4 +1,4 @@
-# AI Search 本地开发环境配置指南
+# AI Search 本地开发环境配置指南 - 单Worker架构
 
 ## 快速启动
 
@@ -8,97 +8,102 @@
 ./dev-start.sh
 ```
 
-这将同时启动Worker和Pages服务：
-- Worker: http://localhost:8787  
-- Pages: http://localhost:8788
+这将启动单一Worker服务器，同时提供前端和API：
+- 前端页面和API: http://localhost:8787
 
-### 方法2: 分别启动服务
+### 方法2: 直接启动服务
 
-1. **启动 Worker 开发服务器**
 ```bash
-npm run dev:worker
+npm run dev
 ```
-Worker 将运行在: http://localhost:8787
 
-2. **在另一个终端启动 Pages 开发服务器**
-```bash
-npm run dev:pages  
-```
-Pages 将运行在: http://localhost:8788
+Worker 将运行在: http://localhost:8787，同时提供：
+- 前端页面: http://localhost:8787/
+- API接口: http://localhost:8787/api
 
-## 服务端口说明
+## 服务架构说明
 
-- **Worker API**: http://localhost:8787
-- **Pages 前端**: http://localhost:8788 (默认端口)
+✅ **单Worker架构优势:**
+- **简化部署**: 只需部署一个Worker
+- **统一管理**: 前端和API在同一个文件中
+- **无跨域问题**: 前端和API使用相同域名
+- **便于维护**: 单一入口点，代码集中管理
 
 ## 开发配置说明
 
-### 当前配置状态
+### 当前架构状态
 
-✅ **已配置项目:**
-- 前端 API URL 已设置为本地 Worker 地址 (`http://localhost:8787`)
-- Worker 包含模拟数据响应，用于本地测试
-- 已添加 CORS 支持，允许前端调用 Worker API
+✅ **单Worker架构配置:**
+- 前端HTML、CSS、JS内嵌在Worker中 (`src/worker/index.js`)
+- API路由处理在同一Worker中 (`/api`)
+- 使用Cloudflare AI绑定，支持AutoRAG和标准LLM
+- 已添加完整的CORS支持
 
-### 需要配置的项目 (用于生产环境):
+### AI服务配置:
 
-1. **AI Search API 配置**
-   - 在 `src/worker/index.js` 中更新 `AI_SEARCH_API_URL`
-   - 使用 `wrangler secret put API_KEY` 配置实际的 API 密钥
-
-2. **生产环境 URL**
-   - 部署后更新 `pages/app.js` 中的 `WORKER_API_URL`
+1. **AutoRAG集成**
+   - 使用 `env.AI.autorag("jolly-water-bbff").aiSearch()` 调用
+   - 自动降级到标准LLM模型作为备选
+   
+2. **模拟数据模式**
+   - 当AI绑定不可用时，返回模拟响应
+   - 便于开发测试和演示
 
 ## 测试说明
 
-当前配置下，应用会返回模拟数据，包括:
-- 示例回答文本
-- 模拟的数据源列表
-
-这允许你测试前端功能，无需真实的 AutoRAG API。
+当前配置下，应用支持：
+- **真实AI服务**: 如果配置了AI绑定，使用AutoRAG或LLM
+- **模拟数据**: 如果未配置AI绑定，返回示例数据
+- **完整前端功能**: 高级选项、错误处理、加载状态等
 
 ## 故障排除
 
 ### 常见问题
 
 1. **端口冲突**
-   - 如果 8787 或 8788 端口被占用，Wrangler 会自动选择其他端口
+   - 如果 8787 端口被占用，Wrangler 会自动选择其他端口
    - 检查终端输出的实际端口号
 
 2. **CORS 错误**
-   - Worker 已配置 CORS 头，应该不会有跨域问题
+   - 单Worker架构无CORS问题，前端和API使用相同域名
    - 如果遇到问题，检查浏览器开发者工具的网络选项卡
 
 3. **API 连接失败**
-   - 确保 Worker 和 Pages 服务都在运行
-   - 检查前端代码中的 API URL 是否正确
+   - 确保Worker开发服务器正在运行
+   - 检查浏览器控制台的错误信息
 
 ### 调试技巧
 
 1. **查看 Worker 日志**
-   - Worker 开发服务器会在终端显示请求日志
-   - 任何 `console.log` 输出都会显示在 Worker 终端
+   - Worker 开发服务器会在终端显示所有请求日志
+   - `console.log` 输出会显示在 Worker 终端
 
 2. **浏览器开发者工具**
    - 打开 F12 开发者工具
    - 查看 Console 和 Network 选项卡
-   - 检查 API 请求和响应
+   - 检查前端页面和API请求
 
-3. **修改代码热重载**
-   - Worker 和 Pages 都支持代码修改后自动重载
+3. **代码热重载**
+   - Worker支持代码修改后自动重载
    - 无需重启开发服务器
 
 ## 下一步
 
-1. 启动开发环境测试基本功能
-2. 根据需要修改 UI 样式和功能
-3. 配置真实的 AI Search API 进行集成测试
-4. 部署到 Cloudflare 进行生产环境测试
+1. 启动开发环境: `npm run dev` 或 `./dev-start.sh`
+2. 访问 http://localhost:8787 测试完整功能
+3. 根据需要修改 `src/worker/index.js` 中的HTML、CSS或API逻辑
+4. 使用 `npm run deploy` 部署到生产环境
 
 ## 工具脚本
 
-### 获取Worker URL
+### 获取Worker状态
 ```bash
 npm run get-worker-url
 ```
-这个脚本会显示当前Worker的部署状态和URL信息。
+显示当前Worker的部署状态和URL信息。
+
+### 部署到生产环境
+```bash
+npm run deploy
+```
+一键部署单Worker到Cloudflare。

@@ -1,87 +1,52 @@
-# Cloudflare 部署配置指南
+# Cloudflare 单Worker部署指南
 
 ## 🚀 部署检查清单
 
 ### 准备工作
 - [ ] 已安装 Wrangler CLI: `npm install -g wrangler`
 - [ ] 已登录 Cloudflare: `wrangler login`
-- [ ] 有 Cloudflare 账户和域名（可选）
+- [ ] 有 Cloudflare 账户（域名可选）
 
-### Worker 部署
-1. **配置 AI Search API**
+### 单Worker 部署
+
+1. **部署 Worker（包含前端+API）**
    ```bash
-   # 设置 API 密钥（安全）
-   wrangler secret put API_KEY
+   npm run deploy
    ```
 
-2. **更新 src/worker/index.js**
-   ```javascript
-   const AI_SEARCH_API_URL = "https://your-actual-ai-search-api-url";
-   ```
+2. **记录 Worker URL**
+   部署后访问地址：`https://aisearch.your-subdomain.workers.dev`
+   - 前端页面：`https://aisearch.your-subdomain.workers.dev/`
+   - API接口：`https://aisearch.your-subdomain.workers.dev/api`
 
-3. **部署 Worker**
-   ```bash
-   npm run deploy:worker
-   ```
-
-4. **记录 Worker URL**
-   部署后将使用：`https://aisearch.tsaitang404.workers.dev`
-
-### Pages 部署
-
-#### 方法1: Git 集成（推荐）
-1. 推送代码到 Git 仓库
-2. Cloudflare Dashboard > Workers & Pages > Create Application
-3. Pages > Connect to Git
-4. 选择仓库并配置：
-   - Build command: （留空）
-   - Build output directory: `pages`
-   - Root directory: （留空）
-
-#### 方法2: 直接部署
-```bash
-npm run pages:deploy
-```
-
-### 部署后配置
-1. **自动环境检测**
-   前端会自动检测运行环境：
-   - 本地开发：使用 `http://localhost:8787`
-   - 生产环境：使用 `https://aisearch.tsaitang404.workers.dev`
-
-2. **手动配置（如果需要）**
-   如需自定义API URL，可编辑 `pages/app.js`：
-   ```javascript
-   const WORKER_API_URL = "https://your-custom-worker-url.workers.dev";
-   ```
-
-## 📁 项目结构说明
+## 📁 单Worker项目结构
 
 ```
 /
-├── src/worker/index.js     # Worker 代码（API 后端）
-├── pages/                  # Pages 文件（前端）
-│   ├── index.html         # 主页面
-│   ├── app.js             # 前端逻辑
-│   ├── styles.css         # 样式
-│   ├── _redirects         # 路由配置
-│   └── _headers           # 安全头配置
+├── src/worker/index.js     # 单Worker代码（前端+API）
+├── pages/                  # 原始前端文件（仅供参考）
 ├── wrangler.toml          # Worker 配置
 └── package.json           # 项目配置
 ```
 
-## 🔧 自定义配置
+## 🔧 配置选项
 
-### 自定义域名
-在 `wrangler.toml` 中配置：
+### AI服务配置
+Worker使用Cloudflare AI绑定，配置在 `wrangler.toml` 中：
 ```toml
-routes = [
-  { pattern = "api.yourdomain.com/*", zone_name = "yourdomain.com" }
-]
+[ai]
+binding = "AI"
 ```
 
-### 环境变量
-在 Cloudflare Dashboard 中设置或使用：
+### 自定义域名（可选）
+在 Cloudflare Dashboard 中配置自定义域名：
+1. 进入 Workers & Pages
+2. 选择您的Worker
+3. 点击 Custom domains
+4. 添加您的域名
+
+### 环境变量（如需要）
+使用 Wrangler 添加秘密变量：
 ```bash
 wrangler secret put VARIABLE_NAME
 ```
@@ -89,24 +54,37 @@ wrangler secret put VARIABLE_NAME
 ## 🔍 故障排除
 
 ### 常见问题
+
 1. **Worker 部署失败**
    - 检查 `wrangler.toml` 配置
    - 确认已登录：`wrangler whoami`
+   - 验证AI绑定配置正确
 
-2. **Pages 构建失败**
-   - 确认 `pages/` 目录存在
-   - 检查文件权限
+2. **前端页面空白**
+   - 检查Worker日志：`wrangler tail`
+   - 验证HTML内容正确嵌入
 
-3. **CORS 错误**
-   - 检查 Worker 中的 CORS 头设置
-   - 确认前端 API URL 正确
+3. **API 请求失败**
+   - 检查浏览器开发者工具网络选项卡
+   - 验证CORS头配置
+   - 检查Worker日志中的错误信息
 
 ### 调试命令
 ```bash
-# 查看 Worker 日志
+# 查看实时日志
 wrangler tail
 
-# 查看本地开发日志
-npm run dev:worker
-npm run dev:pages
+# 本地测试
+npm run dev
+
+# 检查部署状态
+wrangler list
 ```
+
+## 🌟 单Worker架构优势
+
+- ✅ **简化部署**: 一个命令部署完整应用
+- ✅ **无跨域问题**: 前端和API使用相同域名
+- ✅ **统一管理**: 所有代码在一个文件中
+- ✅ **降低延迟**: 减少网络请求跳转
+- ✅ **成本优化**: 只使用一个Worker资源
