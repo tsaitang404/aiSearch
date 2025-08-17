@@ -6,6 +6,16 @@
 const AUTO_RAG_API_URL = "https://your-autorag-api.workers.dev";
 const API_KEY = "YOUR_API_KEY"; // 请替换为您的实际API密钥
 
+// 本地开发模拟响应
+const MOCK_RESPONSE = {
+  answer: "这是一个模拟的AutoRAG响应。在本地开发环境中，您看到的是测试数据。请配置实际的AutoRAG API URL和密钥以获取真实结果。",
+  sources: [
+    "模拟数据源 1",
+    "模拟数据源 2",
+    "模拟数据源 3"
+  ]
+};
+
 export default {
   async fetch(request, env, ctx) {
     // 处理CORS
@@ -35,23 +45,30 @@ export default {
         options: options || {}
       };
 
-      // 调用AutoRAG API
-      const response = await fetch(AUTO_RAG_API_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${API_KEY}`
-        },
-        body: JSON.stringify(autoRagRequest)
-      });
+      // 如果配置了真实的API URL，调用实际的AutoRAG API
+      if (AUTO_RAG_API_URL !== "https://your-autorag-api.workers.dev" && API_KEY !== "YOUR_API_KEY") {
+        // 调用AutoRAG API
+        const response = await fetch(AUTO_RAG_API_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${API_KEY}`
+          },
+          body: JSON.stringify(autoRagRequest)
+        });
 
-      // 获取API响应
-      const data = await response.json();
-
-      // 返回处理后的结果
-      return new Response(JSON.stringify(data), {
-        headers: corsHeaders()
-      });
+        // 获取API响应
+        const data = await response.json();
+        return new Response(JSON.stringify(data), {
+          headers: corsHeaders()
+        });
+      } else {
+        // 返回模拟数据用于本地开发
+        console.log("使用模拟数据，查询:", query);
+        return new Response(JSON.stringify(MOCK_RESPONSE), {
+          headers: corsHeaders()
+        });
+      }
     } catch (error) {
       // 处理错误
       console.error("处理请求时出错:", error);

@@ -1,5 +1,5 @@
 // 配置
-const WORKER_API_URL = "https://autorag-worker.your-subdomain.workers.dev"; // 需要替换为您的Worker URL
+const WORKER_API_URL = "http://localhost:8787"; // 本地开发环境Worker URL
 
 // DOM元素
 const queryInput = document.getElementById('queryInput');
