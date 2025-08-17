@@ -2,7 +2,17 @@
 
 ## 快速启动
 
-### 方法1: 分别启动服务 (推荐)
+### 方法1: 使用启动脚本 (推荐)
+
+```bash
+./dev-start.sh
+```
+
+这将同时启动Worker和Pages服务：
+- Worker: http://localhost:8787  
+- Pages: http://localhost:8788
+
+### 方法2: 分别启动服务
 
 1. **启动 Worker 开发服务器**
 ```bash
@@ -15,22 +25,6 @@ Worker 将运行在: http://localhost:8787
 npm run dev:pages  
 ```
 Pages 将运行在: http://localhost:8788
-
-3. **访问应用**
-打开浏览器访问: http://localhost:8788
-
-### 方法2: 使用启动脚本
-
-```bash
-npm start
-# 或者
-./dev-start.sh
-```
-
-然后在另一个终端运行:
-```bash
-npm run pages:dev
-```
 
 ## 服务端口说明
 

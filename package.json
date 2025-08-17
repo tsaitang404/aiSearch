@@ -6,10 +6,8 @@
   "scripts": {
     "dev": "wrangler dev src/worker/index.js",
     "dev:worker": "wrangler dev src/worker/index.js",
-    "dev:pages": "wrangler pages dev pages",
-    "dev:both": "concurrently \"npm run dev:worker\" \"npm run dev:pages\"",
+    "dev:pages": "wrangler pages dev pages --port 8788",
     "deploy:worker": "wrangler deploy src/worker/index.js",
-    "pages:dev": "wrangler pages dev pages",
     "pages:deploy": "wrangler pages deploy pages",
     "start": "./dev-start.sh"
   },

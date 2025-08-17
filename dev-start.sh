@@ -9,15 +9,33 @@ if [ ! -d "node_modules" ]; then
     npm install
 fi
 
-echo "🔧 启动 Cloudflare Worker 开发服务器..."
+echo "🔧 启动 Cloudflare 开发服务器..."
 echo "Worker 将运行在: http://localhost:8787"
+echo "Pages 将运行在: http://localhost:8788"
 echo ""
-echo "📝 使用以下命令在另一个终端启动 Pages 开发服务器:"
-echo "npm run pages:dev"
-echo ""
-echo "🌐 Pages 将运行在: http://localhost:8788"
-echo ""
-echo "按 Ctrl+C 停止服务器"
-echo ""
+echo "启动 Worker 服务器..."
 
-npm run dev
+# 在后台启动Worker
+npm run dev:worker &
+WORKER_PID=$!
+
+# 等待Worker启动
+sleep 3
+
+echo "启动 Pages 服务器..."
+# 在前台启动Pages，这样可以看到日志并用Ctrl+C停止
+npm run dev:pages &
+PAGES_PID=$!
+
+echo ""
+echo "✅ 两个服务都已启动!"
+echo "🌐 访问 http://localhost:8788 查看前端页面"
+echo "🔧 Worker API: http://localhost:8787"
+echo ""
+echo "按 Ctrl+C 停止所有服务器"
+
+# 设置陷阱来在脚本退出时杀死后台进程
+trap 'echo ""; echo "🛑 正在停止服务器..."; kill $WORKER_PID $PAGES_PID 2>/dev/null; exit' INT TERM
+
+# 等待两个进程
+wait
