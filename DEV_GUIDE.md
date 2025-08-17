@@ -92,5 +92,13 @@ Pages 将运行在: http://localhost:8788
 
 1. 启动开发环境测试基本功能
 2. 根据需要修改 UI 样式和功能
-3. 配置真实的 AutoRAG API 进行集成测试
+3. 配置真实的 AI Search API 进行集成测试
 4. 部署到 Cloudflare 进行生产环境测试
+
+## 工具脚本
+
+### 获取Worker URL
+```bash
+npm run get-worker-url
+```
+这个脚本会显示当前Worker的部署状态和URL信息。

@@ -25,7 +25,7 @@
    ```
 
 4. **记录 Worker URL**
-   部署后会显示类似：`https://aisearch.your-subdomain.workers.dev`
+   部署后将使用：`https://aisearch.tsaitang404.workers.dev`
 
 ### Pages 部署
 
@@ -44,15 +44,15 @@ npm run pages:deploy
 ```
 
 ### 部署后配置
-1. **更新前端 API URL**
-   编辑 `pages/app.js`：
-   ```javascript
-   const WORKER_API_URL = "https://your-worker-url.workers.dev";
-   ```
+1. **自动环境检测**
+   前端会自动检测运行环境：
+   - 本地开发：使用 `http://localhost:8787`
+   - 生产环境：使用 `https://aisearch.tsaitang404.workers.dev`
 
-2. **重新部署 Pages**（如果需要）
-   ```bash
-   npm run pages:deploy
+2. **手动配置（如果需要）**
+   如需自定义API URL，可编辑 `pages/app.js`：
+   ```javascript
+   const WORKER_API_URL = "https://your-custom-worker-url.workers.dev";
    ```
 
 ## 📁 项目结构说明

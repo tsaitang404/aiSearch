@@ -97,10 +97,11 @@ npx wrangler secret put API_KEY
 ```
 
 #### 4. 更新前端配置
-部署完成后，更新 `pages/app.js` 中的 `WORKER_API_URL` 为您的 Worker URL：
-```javascript
-const WORKER_API_URL = "https://autorag-worker.your-subdomain.workers.dev";
-```
+部署完成后，前端会自动检测环境并使用正确的API URL：
+- 本地开发：`http://localhost:8787`
+- 生产环境：`https://aisearch.tsaitang404.workers.dev`
+
+如需手动配置，可编辑 `pages/app.js` 中的 `WORKER_API_URL`。
 
 ### 方法2: 手动部署
 
