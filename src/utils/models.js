@@ -60,9 +60,25 @@ export async function testModelAvailability(env, modelId) {
 }
 
 // 获取可用模型列表
-export async function getAvailableModels(env, fallbackModels) {
+export async function getAvailableModels(env) {
+  // 默认回落模型列表
+  const fallbackModels = [
+    "@cf/meta/llama-2-7b-chat-int8",
+    "@cf/mistral/mistral-7b-instruct-v0.1",
+    "@cf/meta/llama-3-8b-instruct",
+    "@cf/qwen/qwen1.5-7b-chat-awq"
+  ];
+
   if (!env.AI) {
-    return { models: fallbackModels, source: 'static' };
+    return { 
+      models: fallbackModels.map(model => ({
+        name: model,
+        displayName: getModelDisplayName(model),
+        available: false,
+        error: 'AI绑定不可用'
+      })),
+      source: 'static' 
+    };
   }
 
   try {
@@ -88,24 +104,41 @@ export async function getAvailableModels(env, fallbackModels) {
     );
 
     // 处理测试结果
-    const availableModels = {};
+    const availableModels = [];
     modelTests.forEach((result, index) => {
       if (result.status === 'fulfilled') {
         const model = result.value;
-        if (model.available) {
-          availableModels[model.id] = model.name;
-        }
+        availableModels.push({
+          name: model.id,
+          displayName: model.name,
+          available: model.available,
+          category: model.category,
+          error: model.error || null
+        });
         console.log('模型 ' + model.id + ': ' + (model.available ? '可用' : '不可用'));
       }
     });
 
     return {
-      models: Object.keys(availableModels).length > 0 ? availableModels : fallbackModels,
+      models: availableModels.length > 0 ? availableModels : fallbackModels.map(model => ({
+        name: model,
+        displayName: getModelDisplayName(model),
+        available: false,
+        error: '检测失败'
+      })),
       source: 'dynamic'
     };
 
   } catch (error) {
     console.error('动态模型检测失败:', error);
-    return { models: fallbackModels, source: 'static' };
+    return { 
+      models: fallbackModels.map(model => ({
+        name: model,
+        displayName: getModelDisplayName(model),
+        available: false,
+        error: error.message
+      })),
+      source: 'static' 
+    };
   }
 }

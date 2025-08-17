@@ -904,6 +904,33 @@ export const HTML_CONTENT = `<!DOCTYPE html>
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
+
+        #modelSwitchOptions {
+            max-height: 400px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            scrollbar-width: thin;
+            scrollbar-color: #cbd5e1 #f1f5f9;
+        }
+
+        #modelSwitchOptions::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #modelSwitchOptions::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 3px;
+        }
+
+        #modelSwitchOptions::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+            transition: all 0.2s ease;
+        }
+
+        #modelSwitchOptions::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
     </style>
 </head>
 <body>
@@ -1486,10 +1513,10 @@ export const HTML_CONTENT = `<!DOCTYPE html>
         /**
          * 显示模型切换弹窗
          */
-        function showModelSwitchModal() {
-            generateModelOptions();
+        async function showModelSwitchModal() {
             modelSwitchModal.classList.add('show');
             document.body.style.overflow = 'hidden';
+            await generateModelOptions();
         }
 
         /**
@@ -1503,40 +1530,120 @@ export const HTML_CONTENT = `<!DOCTYPE html>
         /**
          * 生成模型选项
          */
-        function generateModelOptions() {
+        async function generateModelOptions() {
             const optionsContainer = document.getElementById('modelSwitchOptions');
             if (!optionsContainer) return;
 
-            const models = [
-                {
-                    name: 'AutoRAG',
-                    desc: '智能检索增强生成',
-                    type: 'autorag',
-                    available: true
-                },
-                {
-                    name: 'Llama 2 7B',
-                    desc: 'Meta开源大语言模型',
-                    type: '@cf/meta/llama-2-7b-chat-int8',
-                    available: true
+            // 显示加载状态
+            optionsContainer.innerHTML = '<div style="text-align: center; padding: 20px; color: #64748b;">正在加载模型列表...</div>';
+
+            try {
+                // 获取可用模型列表
+                const response = await fetch('/api/models');
+                let availableModels = [];
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    availableModels = data.models || [];
                 }
-            ];
 
-            const currentModel = currentSettings.useAutoRAG ? 'AutoRAG' : currentSettings.fallbackModel;
+                // 构建模型列表（始终包含AutoRAG）
+                const models = [
+                    {
+                        name: 'AutoRAG',
+                        desc: '智能检索增强生成',
+                        type: 'AutoRAG',
+                        available: true
+                    },
+                    ...availableModels.map(model => ({
+                        name: getModelDisplayName(model.name || model),
+                        desc: getModelDescription(model.name || model),
+                        type: model.name || model,
+                        available: model.available !== false
+                    }))
+                ];
 
-            optionsContainer.innerHTML = models.map(model => \`
-                <div class="model-option \${getActiveModel() === model.type ? 'active' : ''}" 
-                     data-model="\${model.type}" 
-                     onclick="selectModel('\${model.type}')">
-                    <div class="model-option-info">
-                        <div class="model-option-name">\${model.name}</div>
-                        <div class="model-option-desc">\${model.desc}</div>
+                const currentModel = getActiveModel();
+
+                optionsContainer.innerHTML = models.map(model => \`
+                    <div class="model-option \${currentModel === model.type ? 'active' : ''} \${!model.available ? 'disabled' : ''}" 
+                         data-model="\${model.type}" 
+                         onclick="\${model.available ? \`selectModel('\${model.type}')\` : ''}">
+                        <div class="model-option-info">
+                            <div class="model-option-name">\${model.name}</div>
+                            <div class="model-option-desc">\${model.desc}</div>
+                        </div>
+                        <div class="model-option-badge">
+                            \${model.available ? '可用' : '不可用'}
+                        </div>
                     </div>
-                    <div class="model-option-badge">
-                        \${model.available ? '可用' : '不可用'}
+                \`).join('');
+
+            } catch (error) {
+                console.warn('加载模型列表失败:', error);
+                // 如果API调用失败，显示基本模型选项
+                const fallbackModels = [
+                    {
+                        name: 'AutoRAG',
+                        desc: '智能检索增强生成',
+                        type: 'AutoRAG',
+                        available: true
+                    },
+                    {
+                        name: 'Llama 2 7B',
+                        desc: 'Meta开源大语言模型',
+                        type: '@cf/meta/llama-2-7b-chat-int8',
+                        available: true
+                    }
+                ];
+
+                const currentModel = getActiveModel();
+                optionsContainer.innerHTML = fallbackModels.map(model => \`
+                    <div class="model-option \${currentModel === model.type ? 'active' : ''}" 
+                         data-model="\${model.type}" 
+                         onclick="selectModel('\${model.type}')">
+                        <div class="model-option-info">
+                            <div class="model-option-name">\${model.name}</div>
+                            <div class="model-option-desc">\${model.desc}</div>
+                        </div>
+                        <div class="model-option-badge">可用</div>
                     </div>
-                </div>
-            \`).join('');
+                \`).join('');
+            }
+        }
+
+        /**
+         * 获取模型显示名称
+         */
+        function getModelDisplayName(modelType) {
+            const modelNames = {
+                'AutoRAG': 'AutoRAG',
+                '@cf/meta/llama-2-7b-chat-int8': 'Llama 2 7B',
+                '@cf/mistral/mistral-7b-instruct-v0.1': 'Mistral 7B',
+                '@cf/google/gemma-2b-it': 'Gemma 2B',
+                '@cf/microsoft/phi-2': 'Phi-2',
+                '@cf/openchat/openchat-3.5-0106': 'OpenChat 3.5',
+                '@cf/tiiuae/falcon-7b-instruct': 'Falcon 7B',
+                '@cf/thebloke/codellama-7b-instruct-awq': 'CodeLlama 7B'
+            };
+            return modelNames[modelType] || modelType;
+        }
+
+        /**
+         * 获取模型描述
+         */
+        function getModelDescription(modelType) {
+            const modelDescriptions = {
+                'AutoRAG': '智能检索增强生成',
+                '@cf/meta/llama-2-7b-chat-int8': 'Meta开源大语言模型',
+                '@cf/mistral/mistral-7b-instruct-v0.1': 'Mistral AI 指令调优模型',
+                '@cf/google/gemma-2b-it': 'Google Gemma 轻量级模型',
+                '@cf/microsoft/phi-2': 'Microsoft 高效小型模型',
+                '@cf/openchat/openchat-3.5-0106': 'OpenChat 开源对话模型',
+                '@cf/tiiuae/falcon-7b-instruct': 'TII UAE Falcon 指令模型',
+                '@cf/thebloke/codellama-7b-instruct-awq': 'CodeLlama 代码生成模型'
+            };
+            return modelDescriptions[modelType] || '大语言模型';
         }
 
         /**

@@ -199,12 +199,13 @@ export async function handleModelsAPI(request, env) {
     try {
         logRequest(request, 'models');
 
-        const availableModels = await getAvailableModels(env);
+        const modelsData = await getAvailableModels(env);
         
         return new Response(JSON.stringify({
-            models: availableModels,
+            models: modelsData.models,
             timestamp: new Date().toISOString(),
-            default: FALLBACK_MODELS[0]
+            default: FALLBACK_MODELS[0],
+            source: modelsData.source
         }), {
             headers: {
                 'Content-Type': 'application/json',
