@@ -17,6 +17,7 @@ let chatMessages, chatInput, sendBtn, typingIndicator;
 let settingsPanel, settingsBtn, closeSettingsBtn, settingsOverlay;
 let currentModelBadge, useAutoRAGSelect, fallbackModelSelect;
 let temperatureSlider, temperatureValue, maxTokensInput;
+let scrollToBottomBtn;
 
 /**
  * 初始化应用
@@ -49,6 +50,9 @@ function initializeElements() {
     temperatureSlider = document.getElementById('temperature');
     temperatureValue = document.getElementById('temperatureValue');
     maxTokensInput = document.getElementById('maxTokens');
+    
+    // 回到底部按钮
+    scrollToBottomBtn = document.getElementById('scrollToBottomBtn');
 }
 
 /**
@@ -76,6 +80,12 @@ function setupEventListeners() {
     fallbackModelSelect.addEventListener('change', updateSettings);
     temperatureSlider.addEventListener('input', updateTemperature);
     maxTokensInput.addEventListener('change', updateSettings);
+    
+    // 回到底部按钮事件
+    scrollToBottomBtn.addEventListener('click', scrollToBottomSmooth);
+    
+    // 监听聊天区域滚动事件，控制按钮显示
+    chatMessages.addEventListener('scroll', handleChatScroll);
 }
 
 /**
@@ -410,5 +420,38 @@ function updateModelOptions(models) {
     if (statusDiv) {
         const availableCount = models.filter(m => m.available !== false).length;
         statusDiv.textContent = `找到 ${models.length} 个模型，其中 ${availableCount} 个可用`;
+    }
+}
+
+/**
+ * 处理聊天区域滚动事件
+ */
+function handleChatScroll() {
+    if (!scrollToBottomBtn || !chatMessages) return;
+    
+    const { scrollTop, scrollHeight, clientHeight } = chatMessages;
+    const isNearBottom = scrollTop + clientHeight >= scrollHeight - 100; // 距离底部100px内算作在底部
+    
+    if (isNearBottom) {
+        scrollToBottomBtn.classList.remove('show');
+    } else {
+        scrollToBottomBtn.classList.add('show');
+    }
+}
+
+/**
+ * 通过按钮滚动到底部（平滑滚动）
+ */
+function scrollToBottomSmooth() {
+    if (!chatMessages) return;
+    
+    chatMessages.scrollTo({
+        top: chatMessages.scrollHeight,
+        behavior: 'smooth'
+    });
+    
+    // 隐藏回到底部按钮
+    if (scrollToBottomBtn) {
+        scrollToBottomBtn.classList.remove('show');
     }
 }

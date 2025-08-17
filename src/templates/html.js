@@ -717,6 +717,66 @@ export const HTML_CONTENT = `<!DOCTYPE html>
             visibility: visible !important;
             pointer-events: auto !important;
         }
+
+        /* 底部按钮样式 */
+        .bottom-action-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .bottom-action-btn:hover {
+            transform: translateY(-5px) scale(1.1);
+            box-shadow: 0 8px 30px rgba(102, 126, 234, 0.4);
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+        }
+
+        .bottom-action-btn:active {
+            transform: translateY(-3px) scale(1.05);
+        }
+
+        .bottom-action-btn.show {
+            display: flex;
+            animation: slideInUp 0.3s ease;
+        }
+
+        @keyframes slideInUp {
+            from {
+                transform: translateY(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* 移动端响应式 */
+        @media (max-width: 768px) {
+            .bottom-action-btn {
+                width: 50px;
+                height: 50px;
+                bottom: 15px;
+                right: 15px;
+                font-size: 20px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -801,6 +861,11 @@ export const HTML_CONTENT = `<!DOCTYPE html>
         </div>
     </div>
 
+    <!-- 底部回到底部按钮 -->
+    <button class="bottom-action-btn" id="scrollToBottomBtn" title="回到底部">
+        ↓
+    </button>
+
     <script>
         /**
          * NeoAI 前端JavaScript - 内嵌版本
@@ -821,6 +886,7 @@ export const HTML_CONTENT = `<!DOCTYPE html>
         let settingsPanel, settingsBtn, closeSettingsBtn, settingsOverlay;
         let currentModelBadge, useAutoRAGSelect, fallbackModelSelect;
         let temperatureSlider, temperatureValue, maxTokensInput;
+        let scrollToBottomBtn;
 
         /**
          * 初始化应用
@@ -853,6 +919,9 @@ export const HTML_CONTENT = `<!DOCTYPE html>
             temperatureSlider = document.getElementById('temperature');
             temperatureValue = document.getElementById('temperatureValue');
             maxTokensInput = document.getElementById('maxTokens');
+            
+            // 回到底部按钮
+            scrollToBottomBtn = document.getElementById('scrollToBottomBtn');
         }
 
         /**
@@ -880,6 +949,12 @@ export const HTML_CONTENT = `<!DOCTYPE html>
             fallbackModelSelect.addEventListener('change', updateSettings);
             temperatureSlider.addEventListener('input', updateTemperature);
             maxTokensInput.addEventListener('change', updateSettings);
+            
+            // 回到底部按钮事件
+            scrollToBottomBtn.addEventListener('click', scrollToBottomSmooth);
+            
+            // 监听聊天区域滚动事件，控制按钮显示
+            chatMessages.addEventListener('scroll', handleChatScroll);
         }
 
         /**
@@ -1214,6 +1289,39 @@ export const HTML_CONTENT = `<!DOCTYPE html>
             if (statusDiv) {
                 const availableCount = models.filter(m => m.available !== false).length;
                 statusDiv.textContent = \`找到 \${models.length} 个模型，其中 \${availableCount} 个可用\`;
+            }
+        }
+
+        /**
+         * 处理聊天区域滚动事件
+         */
+        function handleChatScroll() {
+            if (!scrollToBottomBtn || !chatMessages) return;
+            
+            const { scrollTop, scrollHeight, clientHeight } = chatMessages;
+            const isNearBottom = scrollTop + clientHeight >= scrollHeight - 100; // 距离底部100px内算作在底部
+            
+            if (isNearBottom) {
+                scrollToBottomBtn.classList.remove('show');
+            } else {
+                scrollToBottomBtn.classList.add('show');
+            }
+        }
+
+        /**
+         * 通过按钮滚动到底部（平滑滚动）
+         */
+        function scrollToBottomSmooth() {
+            if (!chatMessages) return;
+            
+            chatMessages.scrollTo({
+                top: chatMessages.scrollHeight,
+                behavior: 'smooth'
+            });
+            
+            // 隐藏回到底部按钮
+            if (scrollToBottomBtn) {
+                scrollToBottomBtn.classList.remove('show');
             }
         }
     </script>
