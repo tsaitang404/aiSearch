@@ -44,63 +44,117 @@ const HTML_CONTENT = `<!DOCTYPE html>
             height: 100vh;
             display: flex;
             flex-direction: column;
+            overflow: hidden;
+            animation: backgroundShift 20s ease-in-out infinite;
+        }
+
+        @keyframes backgroundShift {
+            0%, 100% { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+            50% { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
         }
 
         /* 顶部导航栏 */
-        .header {
+                .header {
             background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 15px 20px;
+            backdrop-filter: blur(20px);
+            padding: 20px 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
         .header h1 {
-            color: #1e40af;
+            margin: 0;
+            color: #2d3748;
             font-size: 24px;
-            font-weight: 600;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header h1::before {
+            content: "🤖";
+            font-size: 28px;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-3px); }
+            60% { transform: translateY(-2px); }
         }
 
         .model-indicator {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 12px;
             font-size: 14px;
-            color: #64748b;
+            color: #4a5568;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 8px 16px;
+            border-radius: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .model-indicator:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
 
         .model-badge {
-            background: #3b82f6;
+            background: linear-gradient(135deg, #4CAF50, #45a049);
             color: white;
-            padding: 4px 8px;
-            border-radius: 12px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 600;
             font-size: 12px;
-            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+            animation: pulse 3s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3); }
+            50% { box-shadow: 0 2px 15px rgba(76, 175, 80, 0.5); }
         }
 
         .model-badge.fallback {
-            background: #f59e0b;
-        }
-
-        /* 设置按钮 */
+            background: linear-gradient(135deg, #FF9800, #f57c00);
+            box-shadow: 0 2px 8px rgba(255, 152, 0, 0.3);
+        }        /* 设置按钮 */
         .settings-btn {
-            background: none;
+            background: rgba(255, 255, 255, 0.9);
             border: none;
             cursor: pointer;
-            padding: 8px;
+            padding: 12px;
             border-radius: 50%;
-            color: #64748b;
-            transition: all 0.2s;
+            color: #4a5568;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
 
         .settings-btn:hover {
-            background: rgba(0, 0, 0, 0.1);
-            color: #1e40af;
-        }
-
-        /* 聊天容器 */
+            background: rgba(255, 255, 255, 1);
+            transform: rotate(90deg) scale(1.1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }        /* 聊天容器 */
         .chat-container {
             flex: 1;
             display: flex;
@@ -115,23 +169,54 @@ const HTML_CONTENT = `<!DOCTYPE html>
         .chat-messages {
             flex: 1;
             overflow-y: auto;
+            overflow-x: hidden;
             padding: 20px 0;
             display: flex;
             flex-direction: column;
             gap: 20px;
+            min-height: 0; /* 确保flex项可以收缩 */
+            max-height: calc(100vh - 200px); /* 限制最大高度，为输入框留空间 */
+            scroll-behavior: smooth;
+        }
+
+        /* 自定义滚动条样式 */
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+            transition: background 0.3s ease;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
         }
 
         /* 消息样式 */
         .message {
             display: flex;
-            gap: 12px;
-            max-width: 80%;
-            animation: fadeIn 0.3s ease-out;
+            gap: 15px;
+            max-width: 85%;
+            animation: messageSlideIn 0.5s ease-out;
+            margin-bottom: 24px;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        @keyframes messageSlideIn {
+            from { 
+                opacity: 0; 
+                transform: translateY(20px) scale(0.95); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0) scale(1); 
+            }
         }
 
         .message.user {
@@ -144,39 +229,80 @@ const HTML_CONTENT = `<!DOCTYPE html>
         }
 
         .message-avatar {
-            width: 40px;
-            height: 40px;
+            width: 42px;
+            height: 42px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 600;
+            font-weight: 700;
             font-size: 14px;
             flex-shrink: 0;
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.2);
+            position: relative;
         }
 
         .message.user .message-avatar {
-            background: #3b82f6;
+            background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
         }
 
+        .message.user .message-avatar::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            opacity: 0.3;
+            animation: avatarPulse 3s infinite;
+        }
+
+        @keyframes avatarPulse {
+            0%, 100% { transform: scale(1); opacity: 0.3; }
+            50% { transform: scale(1.1); opacity: 0.1; }
+        }
+
         .message.assistant .message-avatar {
-            background: #10b981;
+            background: linear-gradient(135deg, #10b981, #059669);
             color: white;
         }
 
         .message-content {
-            background: white;
-            padding: 12px 16px;
-            border-radius: 18px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 16px 20px;
+            border-radius: 20px;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
             position: relative;
-            line-height: 1.5;
+            line-height: 1.6;
+            transition: all 0.3s ease;
+            word-wrap: break-word;
+        }
+
+        .message-content:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
         }
 
         .message.user .message-content {
-            background: #3b82f6;
+            background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
+            border: none;
+        }
+
+        .message.user .message-content:hover {
+            box-shadow: 0 6px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .message.assistant .message-content {
+            background: rgba(255, 255, 255, 0.98);
+            color: #2d3748;
+        }
+
+        .message.assistant .message-content:hover {
+            box-shadow: 0 6px 25px rgba(16, 185, 129, 0.2);
         }
 
         .message.assistant .message-content {
@@ -225,60 +351,107 @@ const HTML_CONTENT = `<!DOCTYPE html>
 
         /* 输入区域 */
         .chat-input-container {
-            padding: 20px 0;
+            padding: 25px 20px;
             background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 25px 25px 0 0; /* 顶部圆角 */
+            position: sticky;
+            bottom: 0;
+            z-index: 100;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
         }
 
         .chat-input-wrapper {
             display: flex;
-            gap: 12px;
+            gap: 15px;
             align-items: flex-end;
+            padding: 0;
+            max-width: 800px;
+            margin: 0 auto;
         }
 
         .chat-input {
             flex: 1;
-            border: 2px solid #e2e8f0;
-            border-radius: 20px;
-            padding: 12px 16px;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 25px;
+            padding: 16px 20px;
             font-size: 16px;
             outline: none;
-            transition: border-color 0.2s;
+            transition: all 0.3s ease;
             resize: none;
-            min-height: 44px;
+            min-height: 24px;
+            max-height: 120px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            font-family: inherit;
+        }
             max-height: 120px;
             overflow-y: auto;
             font-family: inherit;
         }
 
         .chat-input:focus {
-            border-color: #3b82f6;
+            border-color: #667eea;
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .chat-input::placeholder {
+            color: #a0aec0;
+            font-style: italic;
         }
 
         .send-btn {
-            background: #3b82f6;
+            background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
             border: none;
             border-radius: 50%;
-            width: 44px;
-            height: 44px;
+            width: 52px;
+            height: 52px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s;
+            transition: all 0.3s ease;
             flex-shrink: 0;
-            font-size: 18px;
+            font-size: 20px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            position: relative;
+            overflow: hidden;
         }
 
+        .send-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            transform: translate(-50%, -50%);
         .send-btn:hover:not(:disabled) {
-            background: #2563eb;
-            transform: translateY(-1px);
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 6px 25px rgba(102, 126, 234, 0.5);
+        }
+
+        .send-btn:hover:not(:disabled)::before {
+            width: 100%;
+            height: 100%;
+        }
+
+        .send-btn:active {
+            transform: translateY(-1px) scale(1.02);
         }
 
         .send-btn:disabled {
-            background: #94a3b8;
+            background: linear-gradient(135deg, #94a3b8, #64748b);
             cursor: not-allowed;
+            box-shadow: 0 2px 8px rgba(148, 163, 184, 0.3);
+        }
         }
 
         /* 加载指示器 */
@@ -303,6 +476,44 @@ const HTML_CONTENT = `<!DOCTYPE html>
             height: 8px;
             border-radius: 50%;
             background: #94a3b8;
+        /* 打字指示器优化 */
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 20px;
+            margin: 10px 0;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+        }
+
+        .typing-indicator.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .typing-indicator .message-avatar {
+            background: linear-gradient(135deg, #10b981, #059669);
+            box-shadow: 0 3px 15px rgba(16, 185, 129, 0.3);
+            animation: avatarPulse 2s infinite;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 6px;
+            padding: 12px 18px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
             animation: typing 1.5s ease-in-out infinite;
         }
 
@@ -320,90 +531,201 @@ const HTML_CONTENT = `<!DOCTYPE html>
                 opacity: 0.4;
             }
             30% {
-                transform: translateY(-10px);
+                transform: translateY(-8px);
                 opacity: 1;
+                background: linear-gradient(135deg, #10b981, #059669);
             }
         }
 
         /* 设置面板 */
         .settings-panel {
-            position: fixed;
-            top: 0;
-            right: -400px;
-            width: 400px;
-            height: 100%;
-            background: white;
-            box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);
-            transition: right 0.3s ease;
-            z-index: 1000;
-            overflow-y: auto;
+            position: fixed !important;
+            top: 0 !important;
+            right: -400px !important;
+            width: 400px !important;
+            height: 100vh !important;
+            background: white !important;
+            box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15) !important;
+            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            z-index: 10000 !important;
+            overflow-y: auto !important;
+            transform: translateZ(0) !important;
+            margin: 0 !important;
+            padding: 0 !important;
         }
 
         .settings-panel.show {
-            right: 0;
+            right: 0 !important;
         }
 
         .settings-header {
-            padding: 20px;
-            border-bottom: 1px solid #e2e8f0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            padding: 20px !important;
+            border-bottom: 1px solid #e2e8f0 !important;
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            background: #f8fafc !important;
+        }
+
+        .settings-header h3 {
+            margin: 0 !important;
+            color: #1e293b !important;
+            font-size: 18px !important;
+            font-weight: 600 !important;
         }
 
         .settings-content {
-            padding: 20px;
+            padding: 20px !important;
+            background: white !important;
         }
 
         .setting-group {
-            margin-bottom: 24px;
+            margin-bottom: 24px !important;
         }
 
         .setting-group label {
-            display: block;
-            font-weight: 600;
-            color: #1e293b;
-            margin-bottom: 8px;
+            display: block !important;
+            font-weight: 600 !important;
+            color: #1e293b !important;
+            margin-bottom: 8px !important;
+            font-size: 14px !important;
         }
 
         .setting-group input,
         .setting-group select {
-            width: 100%;
-            padding: 8px 12px;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            font-size: 14px;
+            width: 100% !important;
+            padding: 8px 12px !important;
+            border: 1px solid #d1d5db !important;
+            border-radius: 6px !important;
+            font-size: 14px !important;
+            background: white !important;
+            color: #1e293b !important;
         }
 
         .setting-group input[type="range"] {
-            margin: 8px 0;
+            margin: 8px 0 !important;
+            background: transparent !important;
+            border: none !important;
         }
 
         .range-value {
-            font-size: 12px;
-            color: #64748b;
+            font-size: 12px !important;
+            color: #64748b !important;
+            margin-top: 4px !important;
         }
 
         .model-status {
-            margin-top: 8px;
-            font-size: 12px;
-            color: #64748b;
-            padding: 4px 8px;
-            background: #f3f4f6;
-            border-radius: 4px;
+            margin-top: 8px !important;
+            font-size: 12px !important;
+            color: #64748b !important;
+            padding: 4px 8px !important;
+            background: #f3f4f6 !important;
+            border-radius: 4px !important;
+        }
+
+        /* 设置按钮样式统一 */
+        .settings-btn {
+            background: rgba(255, 255, 255, 0.9) !important;
+            border: none !important;
+            cursor: pointer !important;
+            padding: 12px !important;
+            border-radius: 50% !important;
+            color: #4a5568 !important;
+            transition: all 0.3s ease !important;
+            font-size: 16px !important;
+            width: 44px !important;
+            height: 44px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            backdrop-filter: blur(10px) !important;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1) !important;
+        }
+
+        .settings-btn:hover {
+            background: rgba(255, 255, 255, 1) !important;
+            transform: scale(1.1) !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
         }
 
         /* 响应式设计 */
         @media (max-width: 768px) {
             .settings-panel {
-                width: 100%;
-                right: -100%;
+                width: 100vw;
+                right: -100vw;
+            }
+            
+            .settings-panel.show {
+                right: 0;
             }
             
             .message {
-                max-width: 90%;
+                max-width: 95%;
+                gap: 12px;
             }
             
+            .message-avatar {
+                width: 36px;
+                height: 36px;
+                font-size: 12px;
+            }
+            
+            .header {
+                padding: 15px 20px;
+            }
+            
+            .header h1 {
+                font-size: 20px;
+            }
+            
+            .chat-container {
+                padding: 0 15px;
+            }
+            
+            .welcome-message {
+                padding: 40px 20px;
+                margin: 20px auto;
+            }
+            
+            .welcome-message h2 {
+                font-size: 26px;
+            }
+            
+            .welcome-message p {
+                font-size: 16px;
+                padding: 15px 20px;
+            }
+            
+            .chat-input {
+                padding: 14px 18px;
+                font-size: 16px;
+            }
+            
+            .send-btn {
+                width: 48px;
+                height: 48px;
+                font-size: 18px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 18px;
+            }
+            
+            .model-indicator {
+                font-size: 12px;
+                gap: 8px;
+            }
+            
+            .message-content {
+                padding: 12px 16px;
+            }
+            
+            .chat-input-container {
+                padding: 20px 0;
+            }
+        }
             .header {
                 padding: 12px 16px;
             }
@@ -421,36 +743,78 @@ const HTML_CONTENT = `<!DOCTYPE html>
         /* 欢迎消息 */
         .welcome-message {
             text-align: center;
-            padding: 40px 20px;
-            color: rgba(255, 255, 255, 0.8);
+            padding: 60px 30px;
+            color: rgba(255, 255, 255, 0.9);
+            animation: welcomeFadeIn 1s ease-out;
+            max-width: 600px;
+            margin: 40px auto;
+        }
+
+        @keyframes welcomeFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .welcome-message h2 {
             color: white;
-            margin-bottom: 10px;
+            margin-bottom: 20px;
+            font-size: 32px;
+            font-weight: 700;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .welcome-message h2::before {
+            content: "✨";
+            font-size: 36px;
+            animation: sparkle 2s ease-in-out infinite;
+        }
+
+        @keyframes sparkle {
+            0%, 100% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(180deg) scale(1.1); }
         }
 
         .welcome-message p {
-            opacity: 0.9;
+            opacity: 0.95;
+            font-size: 18px;
+            line-height: 1.6;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px 30px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
         }
 
         /* 设置覆盖层 */
         .settings-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.3);
-            z-index: 999;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100vh !important;
+            background: rgba(0, 0, 0, 0.5) !important;
+            z-index: 9999 !important;
+            opacity: 0 !important;
+            visibility: hidden !important;
+            transition: opacity 0.3s ease, visibility 0.3s ease !important;
+            pointer-events: none !important;
         }
 
         .settings-overlay.show {
-            opacity: 1;
-            visibility: visible;
+            opacity: 1 !important;
+            visibility: visible !important;
+            pointer-events: auto !important;
         }
     </style>
 </head>
@@ -567,23 +931,55 @@ const HTML_CONTENT = `<!DOCTYPE html>
             useAutoRAGSelect = document.getElementById('useAutoRAG');
             maxTokensInput = document.getElementById('maxTokens');
             
+            // 确保设置面板初始状态是隐藏的
+            if (settingsPanel) {
+                settingsPanel.classList.remove('show');
+                // 强制设置为固定定位，确保脱离文档流
+                settingsPanel.style.position = 'fixed';
+                settingsPanel.style.right = '-400px';
+                settingsPanel.style.zIndex = '10000';
+                
+                // 直接应用样式确保显示
+                applySettingsStyles();
+            }
+            if (settingsOverlay) {
+                settingsOverlay.classList.remove('show');
+                settingsOverlay.style.position = 'fixed';
+                settingsOverlay.style.zIndex = '9999';
+            }
+            
             // 加载可用模型
             loadAvailableModels();
             
             // 设置面板事件
-            if (settingsBtn) {
-                settingsBtn.addEventListener('click', () => {
+            if (settingsBtn && settingsPanel && settingsOverlay) {
+                settingsBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    // 显示设置面板
                     settingsPanel.classList.add('show');
+                    settingsPanel.style.right = '0px';
+                    
+                    // 显示覆盖层
                     settingsOverlay.classList.add('show');
                 });
             }
 
             if (closeSettingsBtn) {
-                closeSettingsBtn.addEventListener('click', closeSettings);
+                closeSettingsBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    closeSettings();
+                });
             }
             
             if (settingsOverlay) {
-                settingsOverlay.addEventListener('click', closeSettings);
+                settingsOverlay.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    closeSettings();
+                });
             }
 
             // 温度滑块更新显示值
@@ -652,8 +1048,131 @@ const HTML_CONTENT = `<!DOCTYPE html>
         }
 
         function closeSettings() {
-            settingsPanel.classList.remove('show');
-            settingsOverlay.classList.remove('show');
+            if (settingsPanel) {
+                settingsPanel.classList.remove('show');
+                settingsPanel.style.right = '-400px';
+            }
+            if (settingsOverlay) {
+                settingsOverlay.classList.remove('show');
+            }
+        }
+
+        // 直接应用设置面板样式
+        function applySettingsStyles() {
+            if (!settingsPanel) return;
+            
+            // 设置面板主体样式
+            Object.assign(settingsPanel.style, {
+                width: '400px',
+                height: '100vh',
+                background: 'white',
+                boxShadow: '-4px 0 20px rgba(0, 0, 0, 0.15)',
+                transition: 'right 0.3s ease',
+                overflowY: 'auto'
+            });
+            
+            // 设置头部样式
+            const header = settingsPanel.querySelector('.settings-header');
+            if (header) {
+                Object.assign(header.style, {
+                    padding: '20px',
+                    borderBottom: '1px solid #e2e8f0',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    background: '#f8fafc'
+                });
+                
+                const h3 = header.querySelector('h3');
+                if (h3) {
+                    Object.assign(h3.style, {
+                        margin: '0',
+                        color: '#1e293b',
+                        fontSize: '18px',
+                        fontWeight: '600'
+                    });
+                }
+                
+                const closeBtn = header.querySelector('.settings-btn');
+                if (closeBtn) {
+                    Object.assign(closeBtn.style, {
+                        background: 'rgba(255, 255, 255, 0.9)',
+                        border: 'none',
+                        cursor: 'pointer',
+                        padding: '8px',
+                        borderRadius: '50%',
+                        color: '#4a5568',
+                        fontSize: '16px',
+                        width: '32px',
+                        height: '32px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                    });
+                }
+            }
+            
+            // 设置内容样式
+            const content = settingsPanel.querySelector('.settings-content');
+            if (content) {
+                Object.assign(content.style, {
+                    padding: '20px',
+                    background: 'white'
+                });
+            }
+            
+            // 设置组样式
+            const groups = settingsPanel.querySelectorAll('.setting-group');
+            groups.forEach(group => {
+                group.style.marginBottom = '24px';
+                
+                const label = group.querySelector('label');
+                if (label) {
+                    Object.assign(label.style, {
+                        display: 'block',
+                        fontWeight: '600',
+                        color: '#1e293b',
+                        marginBottom: '8px',
+                        fontSize: '14px'
+                    });
+                }
+                
+                const inputs = group.querySelectorAll('input, select');
+                inputs.forEach(input => {
+                    if (input.type !== 'range') {
+                        Object.assign(input.style, {
+                            width: '100%',
+                            padding: '8px 12px',
+                            border: '1px solid #d1d5db',
+                            borderRadius: '6px',
+                            fontSize: '14px',
+                            background: 'white',
+                            color: '#1e293b'
+                        });
+                    }
+                });
+                
+                const status = group.querySelector('.model-status');
+                if (status) {
+                    Object.assign(status.style, {
+                        marginTop: '8px',
+                        fontSize: '12px',
+                        color: '#64748b',
+                        padding: '4px 8px',
+                        background: '#f3f4f6',
+                        borderRadius: '4px'
+                    });
+                }
+                
+                const rangeValue = group.querySelector('.range-value');
+                if (rangeValue) {
+                    Object.assign(rangeValue.style, {
+                        fontSize: '12px',
+                        color: '#64748b',
+                        marginTop: '4px'
+                    });
+                }
+            });
         }
 
         function autoResize() {
