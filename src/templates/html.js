@@ -931,6 +931,58 @@ export const HTML_CONTENT = `<!DOCTYPE html>
         #modelSwitchOptions::-webkit-scrollbar-thumb:hover {
             background: #94a3b8;
         }
+
+        .model-features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin-top: 6px;
+        }
+
+        .model-feature-tag {
+            background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+            color: #475569;
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-size: 9px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s ease;
+        }
+
+        .model-option:hover .model-feature-tag {
+            background: linear-gradient(135deg, #e2e8f0, #cbd5e1);
+            color: #334155;
+        }
+
+        .model-option.active .model-feature-tag {
+            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+            color: #1d4ed8;
+            border-color: #3b82f6;
+        }
+
+        /* 特殊特性标签颜色 */
+        .model-feature-tag:nth-child(1) {
+            background: linear-gradient(135deg, #fef3c7, #fed7aa);
+            color: #d97706;
+        }
+
+        .model-feature-tag:nth-child(2) {
+            background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+            color: #16a34a;
+        }
+
+        .model-feature-tag:nth-child(3) {
+            background: linear-gradient(135deg, #fae8ff, #f3e8ff);
+            color: #a855f7;
+        }
+
+        .model-feature-tag:nth-child(4) {
+            background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+            color: #059669;
+        }
     </style>
 </head>
 <body>
@@ -1565,19 +1617,27 @@ export const HTML_CONTENT = `<!DOCTYPE html>
 
                 const currentModel = getActiveModel();
 
-                optionsContainer.innerHTML = models.map(model => \`
+                optionsContainer.innerHTML = models.map(model => {
+                    const features = getModelFeatures(model.type);
+                    const featureHtml = features.map(feature => \`<span class="model-feature-tag">\${feature}</span>\`).join('');
+                    
+                    return \`
                     <div class="model-option \${currentModel === model.type ? 'active' : ''} \${!model.available ? 'disabled' : ''}" 
                          data-model="\${model.type}" 
                          onclick="\${model.available ? \`selectModel('\${model.type}')\` : ''}">
                         <div class="model-option-info">
                             <div class="model-option-name">\${model.name}</div>
                             <div class="model-option-desc">\${model.desc}</div>
+                            <div class="model-features">
+                                \${featureHtml}
+                            </div>
                         </div>
                         <div class="model-option-badge">
                             \${model.available ? '可用' : '不可用'}
                         </div>
                     </div>
-                \`).join('');
+                    \`;
+                }).join('');
 
             } catch (error) {
                 console.warn('加载模型列表失败:', error);
@@ -1598,17 +1658,25 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                 ];
 
                 const currentModel = getActiveModel();
-                optionsContainer.innerHTML = fallbackModels.map(model => \`
+                optionsContainer.innerHTML = fallbackModels.map(model => {
+                    const features = getModelFeatures(model.type);
+                    const featureHtml = features.map(feature => \`<span class="model-feature-tag">\${feature}</span>\`).join('');
+                    
+                    return \`
                     <div class="model-option \${currentModel === model.type ? 'active' : ''}" 
                          data-model="\${model.type}" 
                          onclick="selectModel('\${model.type}')">
                         <div class="model-option-info">
                             <div class="model-option-name">\${model.name}</div>
                             <div class="model-option-desc">\${model.desc}</div>
+                            <div class="model-features">
+                                \${featureHtml}
+                            </div>
                         </div>
                         <div class="model-option-badge">可用</div>
                     </div>
-                \`).join('');
+                    \`;
+                }).join('');
             }
         }
 
@@ -1641,9 +1709,42 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                 '@cf/microsoft/phi-2': 'Microsoft 高效小型模型',
                 '@cf/openchat/openchat-3.5-0106': 'OpenChat 开源对话模型',
                 '@cf/tiiuae/falcon-7b-instruct': 'TII UAE Falcon 指令模型',
-                '@cf/thebloke/codellama-7b-instruct-awq': 'CodeLlama 代码生成模型'
+                '@cf/thebloke/codellama-7b-instruct-awq': 'CodeLlama 代码生成模型',
+                '@cf/meta/llama-3.1-8b-instruct': 'Llama 3.1 8B 指令模型',
+                '@cf/meta/llama-3-8b-instruct': 'Llama 3 8B 指令模型',
+                '@cf/stability-ai/stable-diffusion-xl-base-1.0': 'Stable Diffusion XL 图像生成',
+                '@cf/black-forest-labs/flux-1-schnell': 'Flux 快速图像生成',
+                '@cf/lykon/dreamshaper-8-lcm': 'DreamShaper 图像生成',
+                '@cf/runwayml/stable-diffusion-v1-5-img2img': 'Stable Diffusion 图像转换',
+                '@cf/huggingface/CodeBERTa-small-v1': 'CodeBERTa 代码理解',
+                '@cf/openai/whisper-tiny.en': 'Whisper 语音识别'
             };
             return modelDescriptions[modelType] || '大语言模型';
+        }
+
+        /**
+         * 获取模型特性标签
+         */
+        function getModelFeatures(modelType) {
+            const modelFeatures = {
+                'AutoRAG': ['智能检索', 'RAG增强', '知识库'],
+                '@cf/meta/llama-2-7b-chat-int8': ['对话', '通用'],
+                '@cf/mistral/mistral-7b-instruct-v0.1': ['指令优化', '推理'],
+                '@cf/google/gemma-2b-it': ['轻量级', '快速'],
+                '@cf/microsoft/phi-2': ['小型', '高效', '推理'],
+                '@cf/openchat/openchat-3.5-0106': ['开源', '对话'],
+                '@cf/tiiuae/falcon-7b-instruct': ['指令'],
+                '@cf/thebloke/codellama-7b-instruct-awq': ['代码生成', '编程', '函数调用'],
+                '@cf/meta/llama-3.1-8b-instruct': ['深度思考', '推理', '函数调用'],
+                '@cf/meta/llama-3-8b-instruct': ['推理', '对话'],
+                '@cf/stability-ai/stable-diffusion-xl-base-1.0': ['图像生成', '多模态', 'SDXL'],
+                '@cf/black-forest-labs/flux-1-schnell': ['图像生成', '快速', '高质量'],
+                '@cf/lykon/dreamshaper-8-lcm': ['图像生成', '艺术风格'],
+                '@cf/runwayml/stable-diffusion-v1-5-img2img': ['图像转换', '图像编辑', '多模态'],
+                '@cf/huggingface/CodeBERTa-small-v1': ['代码理解', '语义分析'],
+                '@cf/openai/whisper-tiny.en': ['语音识别', '多模态', '英文']
+            };
+            return modelFeatures[modelType] || ['通用'];
         }
 
         /**
