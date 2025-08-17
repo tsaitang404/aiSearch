@@ -5,19 +5,40 @@
       "label": "安装依赖",
       "type": "shell",
       "command": "npm install",
+      "group": "build",
       "problemMatcher": []
     },
     {
       "label": "启动Worker开发服务器",
       "type": "shell",
       "command": "npm run dev",
+      "group": "build",
       "problemMatcher": [],
-      "isBackground": true
+      "isBackground": true,
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "new"
+      }
     },
     {
       "label": "部署Worker",
       "type": "shell",
       "command": "npm run deploy",
+      "group": "build",
+      "problemMatcher": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true
+      }
+    },
+    {
+      "label": "获取Worker状态",
+      "type": "shell",
+      "command": "npm run get-worker-url",
+      "group": "test",
       "problemMatcher": []
     }
   ]

@@ -4,10 +4,10 @@
   "description": "Cloudflare Worker and Pages application for AI Search integration",
   "main": "src/worker/index.js",
   "scripts": {
-    "dev": "wrangler dev src/worker/index.js",
-    "deploy": "wrangler deploy",
-    "get-worker-url": "./scripts/get-worker-url.sh",
-    "start": "./dev-start.sh"
+    "dev": "wrangler dev --config config/wrangler.toml",
+    "deploy": "wrangler deploy --config config/wrangler.toml",
+    "get-worker-url": "./tools/scripts/get-worker-url.sh",
+    "start": "./tools/scripts/dev-start.sh"
   },
   "author": "",
   "license": "MIT",

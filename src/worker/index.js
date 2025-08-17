@@ -1,7 +1,17 @@
 /**
  * Cloudflare Worker for AI Search - 单Worker架构
  * 同时提供前端页面和API服务
+ * @version 1.0.0
+ * @author AI Search Team
  */
+
+// 配置常量
+const CONFIG = {
+  AUTO_RAG_INSTANCE: "jolly-water-bbff",
+  LLM_MODEL: "@cf/meta/llama-2-7b-chat-int8",
+  MAX_REQUEST_SIZE: 1024 * 1024, // 1MB
+  CACHE_TTL: 3600, // 1 hour
+};
 
 // HTML内容
 const HTML_CONTENT = `<!DOCTYPE html>

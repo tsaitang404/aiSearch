@@ -20,7 +20,7 @@ fi
 # 获取Worker信息
 echo "📋 Worker配置信息："
 echo "Worker名称: aisearch (单Worker架构)"
-echo "预期URL: https://aisearch.tsaitang.workers.dev"
+echo "预期URL: https://aisearch.your-subdomain.workers.dev"
 
 # 检查Worker是否存在
 if wrangler list | grep -q "aisearch"; then
@@ -28,10 +28,10 @@ if wrangler list | grep -q "aisearch"; then
     
     # 尝试测试连接
     echo "🧪 测试Worker连接..."
-    if curl -s -f "https://aisearch.tsaitang.workers.dev" > /dev/null; then
+    if curl -s -f "https://aisearch.your-subdomain.workers.dev" > /dev/null; then
         echo "✅ Worker响应正常"
-        echo "🌐 前端页面: https://aisearch.tsaitang.workers.dev"
-        echo "🔧 API接口: https://aisearch.tsaitang.workers.dev/api"
+        echo "🌐 前端页面: https://aisearch.your-subdomain.workers.dev"
+        echo "🔧 API接口: https://aisearch.your-subdomain.workers.dev/api"
     else
         echo "⚠️  Worker可能尚未完全部署或配置有误"
     fi
@@ -44,5 +44,5 @@ fi
 echo ""
 echo "📝 单Worker架构说明："
 echo "本地开发: http://localhost:8787 (前端+API)"
-echo "生产环境: https://aisearch.tsaitang.workers.dev (前端+API)"
+echo "生产环境: https://aisearch.your-subdomain.workers.dev (前端+API)"
 echo "✨ 一个Worker同时处理前端页面和API请求"

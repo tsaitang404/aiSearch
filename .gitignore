@@ -37,5 +37,10 @@ pnpm-debug.log*
 .DS_Store
 Thumbs.db
 
-# copilot 文件
-.github/copilot-instructions.md
+# 临时文件
+*.tmp
+*.temp
+.cache/
+
+# Cloudflare 相关
+wrangler.toml.bak
