@@ -1,7 +1,7 @@
 // 配置
 const WORKER_API_URL = window.location.hostname === 'localhost' 
   ? "http://localhost:8787" 
-  : "https://aisearch.tsaitang404.workers.dev"; // 生产环境Worker URL
+  : "https://ai-search.tsaitang.workers.dev"; // 生产环境Worker URL
 
 // DOM元素
 const queryInput = document.getElementById('queryInput');
