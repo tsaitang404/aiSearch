@@ -1,17 +1,17 @@
 /**
- * Cloudflare Worker for interacting with AutoRAG API
+ * Cloudflare Worker for AI Search API
  */
 
-// 配置您的AutoRAG API URL和密钥
-const AUTO_RAG_API_URL = "https://your-autorag-api.workers.dev";
+// 配置您的AI Search API URL和密钥
+const AI_SEARCH_API_URL = "https://your-ai-search-api.workers.dev";
 const API_KEY = "YOUR_API_KEY"; // 请替换为您的实际API密钥
 
 // 本地开发模拟响应
 const MOCK_RESPONSE = {
-  answer: "这是一个模拟的AutoRAG响应。在本地开发环境中，您看到的是测试数据。请配置实际的AutoRAG API URL和密钥以获取真实结果。",
+  answer: "这是一个模拟的AI Search响应。在本地开发环境中，您看到的是测试数据。请配置实际的AI Search API URL和密钥以获取真实结果。",
   sources: [
     "模拟数据源 1",
-    "模拟数据源 2",
+    "模拟数据源 2", 
     "模拟数据源 3"
   ]
 };
@@ -39,22 +39,22 @@ export default {
         });
       }
 
-      // 构建请求AutoRAG API的参数
-      const autoRagRequest = {
+      // 构建请求AI Search API的参数
+      const aiSearchRequest = {
         query: query,
         options: options || {}
       };
 
-      // 如果配置了真实的API URL，调用实际的AutoRAG API
-      if (AUTO_RAG_API_URL !== "https://your-autorag-api.workers.dev" && API_KEY !== "YOUR_API_KEY") {
-        // 调用AutoRAG API
-        const response = await fetch(AUTO_RAG_API_URL, {
+      // 如果配置了真实的API URL，调用实际的AI Search API
+      if (AI_SEARCH_API_URL !== "https://your-ai-search-api.workers.dev" && API_KEY !== "YOUR_API_KEY") {
+        // 调用AI Search API
+        const response = await fetch(AI_SEARCH_API_URL, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${API_KEY}`
           },
-          body: JSON.stringify(autoRagRequest)
+          body: JSON.stringify(aiSearchRequest)
         });
 
         // 获取API响应

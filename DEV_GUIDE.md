@@ -1,4 +1,4 @@
-# 本地开发环境配置指南
+# AI Search 本地开发环境配置指南
 
 ## 快速启动
 
@@ -42,8 +42,8 @@ Pages 将运行在: http://localhost:8788
 
 ### 需要配置的项目 (用于生产环境):
 
-1. **AutoRAG API 配置**
-   - 在 `src/worker/index.js` 中更新 `AUTO_RAG_API_URL`
+1. **AI Search API 配置**
+   - 在 `src/worker/index.js` 中更新 `AI_SEARCH_API_URL`
    - 使用 `wrangler secret put API_KEY` 配置实际的 API 密钥
 
 2. **生产环境 URL**

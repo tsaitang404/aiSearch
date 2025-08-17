@@ -1,7 +1,7 @@
 {
-  "name": "cloudflare-autorag",
+  "name": "aisearch",
   "version": "1.0.0",
-  "description": "Cloudflare Worker and Pages application for AutoRAG integration",
+  "description": "Cloudflare Worker and Pages application for AI Search integration",
   "main": "src/worker/index.js",
   "scripts": {
     "dev": "wrangler dev src/worker/index.js",

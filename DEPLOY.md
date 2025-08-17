@@ -8,7 +8,7 @@
 - [ ] 有 Cloudflare 账户和域名（可选）
 
 ### Worker 部署
-1. **配置 AutoRAG API**
+1. **配置 AI Search API**
    ```bash
    # 设置 API 密钥（安全）
    wrangler secret put API_KEY
@@ -16,7 +16,7 @@
 
 2. **更新 src/worker/index.js**
    ```javascript
-   const AUTO_RAG_API_URL = "https://your-actual-autorag-api-url";
+   const AI_SEARCH_API_URL = "https://your-actual-ai-search-api-url";
    ```
 
 3. **部署 Worker**
@@ -25,7 +25,7 @@
    ```
 
 4. **记录 Worker URL**
-   部署后会显示类似：`https://autorag-worker.your-subdomain.workers.dev`
+   部署后会显示类似：`https://aisearch.your-subdomain.workers.dev`
 
 ### Pages 部署
 

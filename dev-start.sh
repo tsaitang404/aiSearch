@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "🚀 启动 AutoRAG 本地开发环境"
+echo "🚀 启动 AI Search 本地开发环境"
 echo ""
 
 # 检查是否安装了依赖

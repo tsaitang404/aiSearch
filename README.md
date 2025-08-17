@@ -1,6 +1,6 @@
-# Cloudflare AutoRAG 应用
+# AI Search 智能搜索应用
 
-这个项目提供了一个完整的解决方案，用于通过Cloudflare Worker和Pages来访问和使用AutoRAG服务。
+这个项目提供了一个完整的解决方案，用于通过Cloudflare Worker和Pages来访问和使用AI Search服务。
 
 ## 项目结构
 
@@ -21,7 +21,7 @@
 ## 前提条件
 
 1. 您需要一个Cloudflare账户
-2. 已创建的AutoRAG应用，并获取了API URL和密钥
+2. 已创建的AI Search应用，并获取了API URL和密钥
 3. 安装了Node.js和npm
 
 ## 设置步骤
@@ -37,7 +37,7 @@ npm install
 在使用之前，您需要更新以下文件中的配置：
 
 1. 在 `src/worker/index.js` 中:
-   - 更新 `AUTO_RAG_API_URL` 为您的AutoRAG API地址
+   - 更新 `AI_SEARCH_API_URL` 为您的AI Search API地址
    - 使用Wrangler Secrets设置您的API密钥（见下文）
 
 2. 在 `pages/app.js` 中:
