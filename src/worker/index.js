@@ -154,6 +154,15 @@ const HTML_CONTENT = `<!DOCTYPE html>
             padding: 0;
         }
 
+        /* 模型状态显示样式 */
+        .model-status {
+            margin-top: 4px;
+            padding: 2px 6px;
+            background-color: #f3f4f6;
+            border-radius: 3px;
+            display: inline-block;
+        }
+
         /* 结果区域样式 */
         .results-container {
             background-color: #fff;
@@ -342,9 +351,59 @@ const HTML_CONTENT = `<!DOCTYPE html>
         const optionsPanel = document.querySelector('.options-panel');
         const temperatureSlider = document.getElementById('temperature');
         const temperatureValue = document.getElementById('temperatureValue');
+        const fallbackModelSelect = document.getElementById('fallbackModel');
+
+        // 动态获取可用模型
+        async function loadAvailableModels() {
+            try {
+                console.log('正在获取可用模型列表...');
+                const response = await fetch(window.location.origin + '/api/models');
+                const data = await response.json();
+                
+                if (data.models) {
+                    // 清空现有选项
+                    fallbackModelSelect.innerHTML = '';
+                    
+                    // 添加新的模型选项
+                    Object.entries(data.models).forEach(([modelId, modelName]) => {
+                        const option = document.createElement('option');
+                        option.value = modelId;
+                        option.textContent = modelName;
+                        fallbackModelSelect.appendChild(option);
+                    });
+                    
+                    console.log('已加载 ' + Object.keys(data.models).length + ' 个可用模型 (' + data.source + ')');
+                    
+                    // 添加模型获取状态显示
+                    const modelStatus = document.createElement('small');
+                    modelStatus.style.color = '#666';
+                    modelStatus.style.fontSize = '12px';
+                    modelStatus.textContent = data.source === 'dynamic' ? 
+                        '✅ 已动态检测可用模型' : '⚠️ 使用预设模型列表';
+                    
+                    // 将状态显示添加到回落模型选择器后面
+                    const modelGroup = fallbackModelSelect.parentElement;
+                    const existingStatus = modelGroup.querySelector('.model-status');
+                    if (existingStatus) {
+                        existingStatus.remove();
+                    }
+                    modelStatus.className = 'model-status';
+                    modelGroup.appendChild(modelStatus);
+                    
+                } else if (data.error) {
+                    console.warn('获取模型列表失败:', data.error);
+                }
+            } catch (error) {
+                console.error('获取模型列表时发生错误:', error);
+                // 保持默认的静态模型列表
+            }
+        }
 
         // 事件监听器
         document.addEventListener('DOMContentLoaded', () => {
+            // 加载可用模型
+            loadAvailableModels();
+            
             // 选项面板切换
             toggleOptions.addEventListener('click', () => {
                 optionsPanel.classList.toggle('hidden');
@@ -433,17 +492,11 @@ const HTML_CONTENT = `<!DOCTYPE html>
                     currentModelElement.textContent = 'AutoRAG (模拟)';
                     currentModelElement.className = 'model-name';
                 } else {
-                    // 显示回落模型名称
-                    const modelNames = {
-                        "@cf/meta/llama-2-7b-chat-int8": "Llama 2 7B",
-                        "@cf/mistral/mistral-7b-instruct-v0.1": "Mistral 7B",
-                        "@cf/meta/llama-2-7b-chat-fp16": "Llama 2 7B FP16",
-                        "@cf/microsoft/phi-2": "Phi-2",
-                        "@cf/qwen/qwen1.5-0.5b-chat": "Qwen 0.5B",
-                        "@cf/qwen/qwen1.5-1.8b-chat": "Qwen 1.8B",
-                        "@cf/qwen/qwen1.5-7b-chat-awq": "Qwen 7B AWQ"
-                    };
-                    currentModelElement.textContent = modelNames[data.model_used] || data.model_used;
+                    // 尝试从下拉选项中获取模型显示名称
+                    const modelOption = fallbackModelSelect.querySelector(\`option[value="\${data.model_used}"]\`);
+                    const displayName = modelOption ? modelOption.textContent : data.model_used.replace('@cf/', '');
+                    
+                    currentModelElement.textContent = displayName;
                     currentModelElement.className = 'model-name fallback';
                 }
             } else {
@@ -548,6 +601,37 @@ function corsHeaders() {
   };
 }
 
+// 辅助函数：获取模型显示名称
+function getModelDisplayName(modelId) {
+  const nameMap = {
+    "@cf/meta/llama-2-7b-chat-int8": "Llama 2 7B Chat (Int8)",
+    "@cf/meta/llama-2-7b-chat-fp16": "Llama 2 7B Chat (FP16)", 
+    "@cf/mistral/mistral-7b-instruct-v0.1": "Mistral 7B Instruct",
+    "@cf/microsoft/phi-2": "Microsoft Phi-2",
+    "@cf/qwen/qwen1.5-0.5b-chat": "Qwen 1.5 0.5B Chat",
+    "@cf/qwen/qwen1.5-1.8b-chat": "Qwen 1.5 1.8B Chat",
+    "@cf/qwen/qwen1.5-7b-chat-awq": "Qwen 1.5 7B Chat (AWQ)",
+    "@cf/qwen/qwen1.5-14b-chat-awq": "Qwen 1.5 14B Chat (AWQ)",
+    "@cf/meta/llama-3-8b-instruct": "Llama 3 8B Instruct",
+    "@cf/meta/llama-3.1-8b-instruct": "Llama 3.1 8B Instruct",
+    "@cf/google/gemma-7b-it": "Google Gemma 7B IT",
+    "@cf/openchat/openchat-3.5-0106": "OpenChat 3.5"
+  };
+  
+  return nameMap[modelId] || modelId.replace('@cf/', '').replace('/', ' ');
+}
+
+// 辅助函数：获取模型分类
+function getModelCategory(modelId) {
+  if (modelId.includes('llama')) return 'Meta Llama';
+  if (modelId.includes('mistral')) return 'Mistral';
+  if (modelId.includes('qwen')) return 'Qwen'; 
+  if (modelId.includes('phi')) return 'Microsoft';
+  if (modelId.includes('gemma')) return 'Google';
+  if (modelId.includes('openchat')) return 'OpenChat';
+  return 'Other';
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
@@ -565,6 +649,102 @@ export default {
           "Cache-Control": "public, max-age=3600",
         }
       });
+    }
+
+    // 获取可用模型列表
+    if (request.method === "GET" && url.pathname === "/api/models") {
+      try {
+        let availableModels = {};
+        
+        if (env.AI) {
+          // 尝试获取动态模型列表
+          try {
+            // 使用一些已知的模型来测试可用性
+            const testModels = [
+              "@cf/meta/llama-2-7b-chat-int8",
+              "@cf/meta/llama-2-7b-chat-fp16", 
+              "@cf/mistral/mistral-7b-instruct-v0.1",
+              "@cf/microsoft/phi-2",
+              "@cf/qwen/qwen1.5-0.5b-chat",
+              "@cf/qwen/qwen1.5-1.8b-chat",
+              "@cf/qwen/qwen1.5-7b-chat-awq",
+              "@cf/qwen/qwen1.5-14b-chat-awq",
+              "@cf/meta/llama-3-8b-instruct",
+              "@cf/meta/llama-3.1-8b-instruct",
+              "@cf/google/gemma-7b-it",
+              "@cf/openchat/openchat-3.5-0106"
+            ];
+
+            // 并发测试模型可用性（使用简单的模型信息查询）
+            const modelTests = await Promise.allSettled(
+              testModels.map(async (modelId) => {
+                try {
+                  // 尝试用一个简单的查询来测试模型是否可用
+                  const testResponse = await env.AI.run(modelId, {
+                    messages: [{ role: "user", content: "Hi" }],
+                    max_tokens: 1
+                  });
+                  
+                  return {
+                    id: modelId,
+                    name: getModelDisplayName(modelId),
+                    available: true,
+                    category: getModelCategory(modelId)
+                  };
+                } catch (error) {
+                  return {
+                    id: modelId, 
+                    name: getModelDisplayName(modelId),
+                    available: false,
+                    error: error.message,
+                    category: getModelCategory(modelId)
+                  };
+                }
+              })
+            );
+
+            // 处理测试结果
+            modelTests.forEach((result, index) => {
+              if (result.status === 'fulfilled') {
+                const model = result.value;
+                if (model.available) {
+                  availableModels[model.id] = model.name;
+                }
+                console.log(`模型 ${model.id}: ${model.available ? '可用' : '不可用'}`);
+              }
+            });
+
+          } catch (error) {
+            console.error('动态模型检测失败:', error);
+            // 如果动态检测失败，使用预设的模型列表
+            availableModels = CONFIG.FALLBACK_MODELS;
+          }
+        } else {
+          // 如果没有AI绑定，返回预设的模型列表
+          availableModels = CONFIG.FALLBACK_MODELS;
+        }
+
+        return new Response(JSON.stringify({
+          models: availableModels,
+          timestamp: new Date().toISOString(),
+          source: env.AI ? 'dynamic' : 'static'
+        }), {
+          headers: {
+            ...corsHeaders(),
+            'Cache-Control': 'public, max-age=300' // 缓存5分钟
+          }
+        });
+        
+      } catch (error) {
+        console.error('获取模型列表失败:', error);
+        return new Response(JSON.stringify({ 
+          error: "获取模型列表失败",
+          models: CONFIG.FALLBACK_MODELS // 返回备用列表
+        }), {
+          status: 500,
+          headers: corsHeaders()
+        });
+      }
     }
 
     // API路由
