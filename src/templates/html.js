@@ -81,11 +81,18 @@ export const HTML_CONTENT = `<!DOCTYPE html>
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.3);
             transition: all 0.3s ease;
+            cursor: pointer;
         }
 
         .model-indicator:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .model-indicator:active {
+            transform: translateY(0px);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
 
         .model-badge {
@@ -777,6 +784,126 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                 font-size: 20px;
             }
         }
+
+        /* 模型切换弹窗 */
+        .model-switch-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            backdrop-filter: blur(5px);
+        }
+
+        .model-switch-modal.show {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .model-switch-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideInScale 0.3s ease;
+        }
+
+        .model-switch-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f1f5f9;
+        }
+
+        .model-switch-header h3 {
+            color: #2d3748;
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .modal-close-btn {
+            background: #ef4444;
+            border: none;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .modal-close-btn:hover {
+            background: #dc2626;
+            transform: scale(1.1);
+        }
+
+        .model-option {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            margin: 8px 0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+        }
+
+        .model-option:hover {
+            background: #f8fafc;
+            border-color: #e2e8f0;
+        }
+
+        .model-option.active {
+            background: #eff6ff;
+            border-color: #3b82f6;
+        }
+
+        .model-option.active .model-option-badge {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        }
+
+        .model-option-info {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .model-option-name {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 2px;
+        }
+
+        .model-option-desc {
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .model-option-badge {
+            background: linear-gradient(135deg, #64748b, #475569);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
     </style>
 </head>
 <body>
@@ -866,6 +993,21 @@ export const HTML_CONTENT = `<!DOCTYPE html>
         ↓
     </button>
 
+    <!-- 模型切换弹窗 -->
+    <div class="model-switch-modal" id="modelSwitchModal">
+        <div class="model-switch-content">
+            <div class="model-switch-header">
+                <h3>选择模型</h3>
+                <button class="modal-close-btn" id="closeModelSwitchBtn" title="关闭">
+                    ✕
+                </button>
+            </div>
+            <div id="modelSwitchOptions">
+                <!-- 模型选项将通过 JavaScript 动态生成 -->
+            </div>
+        </div>
+    </div>
+
     <script>
         /**
          * NeoAI 前端JavaScript - 内嵌版本
@@ -886,7 +1028,7 @@ export const HTML_CONTENT = `<!DOCTYPE html>
         let settingsPanel, settingsBtn, closeSettingsBtn, settingsOverlay;
         let currentModelBadge, useAutoRAGSelect, fallbackModelSelect;
         let temperatureSlider, temperatureValue, maxTokensInput;
-        let scrollToBottomBtn;
+        let scrollToBottomBtn, modelIndicator, modelSwitchModal, closeModelSwitchBtn;
 
         /**
          * 初始化应用
@@ -922,6 +1064,11 @@ export const HTML_CONTENT = `<!DOCTYPE html>
             
             // 回到底部按钮
             scrollToBottomBtn = document.getElementById('scrollToBottomBtn');
+            
+            // 模型切换相关元素
+            modelIndicator = document.querySelector('.model-indicator');
+            modelSwitchModal = document.getElementById('modelSwitchModal');
+            closeModelSwitchBtn = document.getElementById('closeModelSwitchBtn');
         }
 
         /**
@@ -955,6 +1102,17 @@ export const HTML_CONTENT = `<!DOCTYPE html>
             
             // 监听聊天区域滚动事件，控制按钮显示
             chatMessages.addEventListener('scroll', handleChatScroll);
+            
+            // 模型指示器点击事件
+            modelIndicator.addEventListener('click', showModelSwitchModal);
+            
+            // 模型切换弹窗事件
+            closeModelSwitchBtn.addEventListener('click', closeModelSwitchModal);
+            modelSwitchModal.addEventListener('click', function(e) {
+                if (e.target === modelSwitchModal) {
+                    closeModelSwitchModal();
+                }
+            });
         }
 
         /**
@@ -1323,6 +1481,94 @@ export const HTML_CONTENT = `<!DOCTYPE html>
             if (scrollToBottomBtn) {
                 scrollToBottomBtn.classList.remove('show');
             }
+        }
+
+        /**
+         * 显示模型切换弹窗
+         */
+        function showModelSwitchModal() {
+            generateModelOptions();
+            modelSwitchModal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        /**
+         * 关闭模型切换弹窗
+         */
+        function closeModelSwitchModal() {
+            modelSwitchModal.classList.remove('show');
+            document.body.style.overflow = '';
+        }
+
+        /**
+         * 生成模型选项
+         */
+        function generateModelOptions() {
+            const optionsContainer = document.getElementById('modelSwitchOptions');
+            if (!optionsContainer) return;
+
+            const models = [
+                {
+                    name: 'AutoRAG',
+                    desc: '智能检索增强生成',
+                    type: 'autorag',
+                    available: true
+                },
+                {
+                    name: 'Llama 2 7B',
+                    desc: 'Meta开源大语言模型',
+                    type: '@cf/meta/llama-2-7b-chat-int8',
+                    available: true
+                }
+            ];
+
+            const currentModel = currentSettings.useAutoRAG ? 'AutoRAG' : currentSettings.fallbackModel;
+
+            optionsContainer.innerHTML = models.map(model => \`
+                <div class="model-option \${getActiveModel() === model.type ? 'active' : ''}" 
+                     data-model="\${model.type}" 
+                     onclick="selectModel('\${model.type}')">
+                    <div class="model-option-info">
+                        <div class="model-option-name">\${model.name}</div>
+                        <div class="model-option-desc">\${model.desc}</div>
+                    </div>
+                    <div class="model-option-badge">
+                        \${model.available ? '可用' : '不可用'}
+                    </div>
+                </div>
+            \`).join('');
+        }
+
+        /**
+         * 获取当前激活的模型
+         */
+        function getActiveModel() {
+            return currentSettings.useAutoRAG ? 'AutoRAG' : currentSettings.fallbackModel;
+        }
+
+        /**
+         * 选择模型
+         */
+        function selectModel(modelType) {
+            if (modelType === 'AutoRAG') {
+                currentSettings.useAutoRAG = true;
+            } else {
+                currentSettings.useAutoRAG = false;
+                currentSettings.fallbackModel = modelType;
+            }
+
+            // 更新设置UI
+            if (useAutoRAGSelect) useAutoRAGSelect.value = currentSettings.useAutoRAG.toString();
+            if (fallbackModelSelect) fallbackModelSelect.value = currentSettings.fallbackModel;
+
+            // 更新模型标识
+            updateModelBadge(modelType === 'AutoRAG' ? 'AutoRAG' : modelType);
+
+            // 保存设置
+            saveSettings();
+
+            // 关闭弹窗
+            closeModelSwitchModal();
         }
     </script>
 </body>

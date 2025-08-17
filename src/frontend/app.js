@@ -17,7 +17,7 @@ let chatMessages, chatInput, sendBtn, typingIndicator;
 let settingsPanel, settingsBtn, closeSettingsBtn, settingsOverlay;
 let currentModelBadge, useAutoRAGSelect, fallbackModelSelect;
 let temperatureSlider, temperatureValue, maxTokensInput;
-let scrollToBottomBtn;
+let scrollToBottomBtn, modelIndicator, modelSwitchModal, closeModelSwitchBtn;
 
 /**
  * 初始化应用
@@ -53,6 +53,11 @@ function initializeElements() {
     
     // 回到底部按钮
     scrollToBottomBtn = document.getElementById('scrollToBottomBtn');
+    
+    // 模型切换相关元素
+    modelIndicator = document.querySelector('.model-indicator');
+    modelSwitchModal = document.getElementById('modelSwitchModal');
+    closeModelSwitchBtn = document.getElementById('closeModelSwitchBtn');
 }
 
 /**
@@ -86,6 +91,17 @@ function setupEventListeners() {
     
     // 监听聊天区域滚动事件，控制按钮显示
     chatMessages.addEventListener('scroll', handleChatScroll);
+    
+    // 模型指示器点击事件
+    modelIndicator.addEventListener('click', showModelSwitchModal);
+    
+    // 模型切换弹窗事件
+    closeModelSwitchBtn.addEventListener('click', closeModelSwitchModal);
+    modelSwitchModal.addEventListener('click', function(e) {
+        if (e.target === modelSwitchModal) {
+            closeModelSwitchModal();
+        }
+    });
 }
 
 /**
@@ -454,4 +470,92 @@ function scrollToBottomSmooth() {
     if (scrollToBottomBtn) {
         scrollToBottomBtn.classList.remove('show');
     }
+}
+
+/**
+ * 显示模型切换弹窗
+ */
+function showModelSwitchModal() {
+    generateModelOptions();
+    modelSwitchModal.classList.add('show');
+    document.body.style.overflow = 'hidden';
+}
+
+/**
+ * 关闭模型切换弹窗
+ */
+function closeModelSwitchModal() {
+    modelSwitchModal.classList.remove('show');
+    document.body.style.overflow = '';
+}
+
+/**
+ * 生成模型选项
+ */
+function generateModelOptions() {
+    const optionsContainer = document.getElementById('modelSwitchOptions');
+    if (!optionsContainer) return;
+
+    const models = [
+        {
+            name: 'AutoRAG',
+            desc: '智能检索增强生成',
+            type: 'AutoRAG',
+            available: true
+        },
+        {
+            name: 'Llama 2 7B',
+            desc: 'Meta开源大语言模型',
+            type: '@cf/meta/llama-2-7b-chat-int8',
+            available: true
+        }
+    ];
+
+    const currentModel = currentSettings.useAutoRAG ? 'AutoRAG' : currentSettings.fallbackModel;
+
+    optionsContainer.innerHTML = models.map(model => `
+        <div class="model-option ${getActiveModel() === model.type ? 'active' : ''}" 
+             data-model="${model.type}" 
+             onclick="selectModel('${model.type}')">
+            <div class="model-option-info">
+                <div class="model-option-name">${model.name}</div>
+                <div class="model-option-desc">${model.desc}</div>
+            </div>
+            <div class="model-option-badge">
+                ${model.available ? '可用' : '不可用'}
+            </div>
+        </div>
+    `).join('');
+}
+
+/**
+ * 获取当前激活的模型
+ */
+function getActiveModel() {
+    return currentSettings.useAutoRAG ? 'AutoRAG' : currentSettings.fallbackModel;
+}
+
+/**
+ * 选择模型
+ */
+function selectModel(modelType) {
+    if (modelType === 'AutoRAG') {
+        currentSettings.useAutoRAG = true;
+    } else {
+        currentSettings.useAutoRAG = false;
+        currentSettings.fallbackModel = modelType;
+    }
+
+    // 更新设置UI
+    if (useAutoRAGSelect) useAutoRAGSelect.value = currentSettings.useAutoRAG.toString();
+    if (fallbackModelSelect) fallbackModelSelect.value = currentSettings.fallbackModel;
+
+    // 更新模型标识
+    updateModelBadge(modelType === 'AutoRAG' ? 'AutoRAG' : modelType);
+
+    // 保存设置
+    saveSettings();
+
+    // 关闭弹窗
+    closeModelSwitchModal();
 }
