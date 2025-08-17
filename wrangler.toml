@@ -2,8 +2,12 @@ name = "ai-search"
 main = "src/worker/index.js"
 compatibility_date = "2024-01-01"
 
-# Pages 配置 (仅用于文档说明，实际Worker部署不使用此配置)
-# pages_build_output_dir = "pages"
+# AI 绑定配置
+[ai]
+binding = "AI"
+
+# Pages 配置
+pages_build_output_dir = "pages"
 
 # 自定义子域名配置
 # 部署后将使用: https://aisearch.tsaitang404.workers.dev
@@ -14,9 +18,8 @@ compatibility_date = "2024-01-01"
 # ]
 
 # 环境变量配置
-[vars]
-# AUTO_RAG_API_URL = "https://your-autorag-api.workers.dev"
-# 不要在这里直接配置API_KEY，应使用秘密变量
+# [vars]
+# 使用AI绑定，不需要额外的环境变量
 
 # 开发环境配置
 [dev]
