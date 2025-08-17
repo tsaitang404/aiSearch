@@ -1,12 +1,13 @@
 <!-- Use this file to provide workspace-specific custom instructions to Copilot. For more details, visit https://code.visualstudio.com/docs/copilot/copilot-customization#_use-a-githubcopilotinstructionsmd-file -->
 
-# Cloudflare AutoRAG 应用指南
+# Cloudflare NeoAI 应用指南
 
-此项目是一个使用Cloudflare Worker和Pages与AutoRAG服务集成的应用。
+此项目是一个使用Cloudflare Worker和AutoRAG服务集成的智能对话应用。
 
 ## 项目结构
-- `src/worker/` - 包含Cloudflare Worker代码，用于与AutoRAG API通信
-- `pages/` - 包含Cloudflare Pages前端代码，提供用户界面
+- `src/worker/` - 包含Cloudflare Worker代码，单一架构同时提供前端和API服务
+- `config/` - 包含Cloudflare配置文件
+- `docs/` - 包含项目文档
 
 ## 开发注意事项
 - Worker需要处理CORS和错误处理

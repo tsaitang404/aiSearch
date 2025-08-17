@@ -1,4 +1,4 @@
-# AI Search 本地开发环境配置指南 - 单Worker架构
+# NeoAI 本地开发环境配置指南 - 单Worker架构
 
 ## 快速启动
 
@@ -42,7 +42,7 @@ Worker 将运行在: http://localhost:8787，同时提供：
 ### AI服务配置:
 
 1. **AutoRAG集成**
-   - 使用 `env.AI.autorag("jolly-water-bbff").aiSearch()` 调用
+   - 使用 `env.AI.autorag("jolly-water-bbff").neoai()` 调用
    - 自动降级到标准LLM模型作为备选
    
 2. **模拟数据模式**

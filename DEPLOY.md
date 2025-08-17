@@ -15,9 +15,9 @@
    ```
 
 2. **记录 Worker URL**
-   部署后访问地址：`https://aisearch.your-subdomain.workers.dev`
-   - 前端页面：`https://aisearch.your-subdomain.workers.dev/`
-   - API接口：`https://aisearch.your-subdomain.workers.dev/api`
+   部署后访问地址：`https://neoai.tsaitang.workers.dev`
+   - 前端页面：`https://neoai.tsaitang.workers.dev/`
+   - API接口：`https://neoai.tsaitang.workers.dev/api`
 
 ## 📁 单Worker项目结构
 

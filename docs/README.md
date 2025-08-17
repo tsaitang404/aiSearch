@@ -1,4 +1,4 @@
-# AI Search 智能搜索应用
+# NeoAI 智能搜索应用
 
 这个项目提供了一个完整的解决方案，基于Cloudflare Worker的单一架构，同时提供前端页面和AI搜索API服务。
 
@@ -21,14 +21,14 @@
 
 🚀 **单Worker架构**
 - 一个Worker同时处理前端页面服务和API请求
-- 前端访问: `https://aisearch.your-subdomain.workers.dev`
-- API接口: `https://aisearch.your-subdomain.workers.dev/api`
+- 前端访问: `https://neoai.tsaitang.workers.dev`
+- API接口: `https://neoai.tsaitang.workers.dev/api`
 - 简化部署和维护
 
 ## 前提条件
 
 1. 您需要一个Cloudflare账户
-2. 已创建的AI Search应用，并获取了API URL和密钥
+2. 已创建的 NeoAI 应用，并配置了 AutoRAG 集成
 3. 安装了Node.js和npm
 
 ## 设置步骤
@@ -70,12 +70,12 @@ npm run deploy
 ```
 
 部署后，您的应用将可以通过以下地址访问：
-- https://aisearch.your-subdomain.workers.dev (前端页面)
-- https://aisearch.your-subdomain.workers.dev/api (API接口)
+- https://neoai.tsaitang.workers.dev (前端页面)
+- https://neoai.tsaitang.workers.dev/api (API接口)
 
 ## 使用说明
 
-1. 访问部署的Worker URL (例如: https://aisearch.your-subdomain.workers.dev)
+1. 访问部署的Worker URL (例如: https://neoai.tsaitang.workers.dev)
 2. 在文本框中输入您的查询
 3. 可以展开"高级选项"调整参数（如温度、最大令牌数等）
 4. 点击"提交查询"按钮

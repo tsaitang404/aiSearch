@@ -8,7 +8,7 @@ Cloudflare Worker 的主要配置文件。
 
 ### 主要配置项
 
-- `name`: Worker 的名称 (`aisearch`)
+- `name`: Worker 的名称 (`neoai`)
 - `main`: Worker 入口文件路径 (`src/worker/index.js`)
 - `compatibility_date`: API 兼容性日期
 - `[ai]`: AI 服务绑定配置

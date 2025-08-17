@@ -1,17 +1,41 @@
 {
-  "name": "aisearch",
-  "version": "1.0.0",
-  "description": "Cloudflare Worker and Pages application for AI Search integration",
+  "name": "neoai",
+  "version": "2.1.0",
+  "description": "NeoAI - 基于 Cloudflare Worker 的智能对话应用，集成 AutoRAG 和多种 LLM 模型",
   "main": "src/worker/index.js",
+  "type": "module",
   "scripts": {
-    "dev": "wrangler dev --config config/wrangler.toml",
+    "dev": "wrangler dev --config config/wrangler.toml --local",
+    "dev:remote": "wrangler dev --config config/wrangler.toml",
     "deploy": "wrangler deploy --config config/wrangler.toml",
     "get-worker-url": "./tools/scripts/get-worker-url.sh",
-    "start": "./tools/scripts/dev-start.sh"
+    "start": "./tools/scripts/dev-start.sh",
+    "logs": "wrangler tail",
+    "validate": "wrangler validate --config config/wrangler.toml",
+    "lint": "echo 'Running basic validation...' && node -c src/worker/index.js",
+    "test": "echo 'Running tests would go here'",
+    "build": "echo 'Build step (if needed) would go here'",
+    "status": "wrangler whoami && wrangler d1 info"
   },
-  "author": "",
+  "keywords": [
+    "cloudflare",
+    "worker", 
+    "ai",
+    "chatbot",
+    "autorag",
+    "llm",
+    "neoai"
+  ],
+  "author": "NeoAI Team",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tsaitang404/neoai.git"
+  },
   "devDependencies": {
     "wrangler": "^3.30.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

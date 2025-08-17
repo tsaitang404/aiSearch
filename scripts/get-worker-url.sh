@@ -18,14 +18,14 @@ if ! wrangler whoami &> /dev/null; then
 fi
 
 # Worker名称和URL配置
-WORKER_NAME="aisearch"
+WORKER_NAME="neoai"
 WORKER_DOMAIN="tsaitang.workers.dev"
 WORKER_URL="https://${WORKER_NAME}.${WORKER_DOMAIN}"
 
 # 获取Worker信息
 echo "📋 Worker配置信息："
 echo "Worker名称: ${WORKER_NAME} (单Worker架构)"
-echo "预期URL: ${WORKER_URL}"
+echo "预期URL: https://neoai.tsaitang.workers.dev"
 
 # 检查Worker是否已部署
 if wrangler list | grep -q "${WORKER_NAME}"; then
@@ -49,5 +49,5 @@ fi
 echo ""
 echo "📝 单Worker架构说明："
 echo "本地开发: http://localhost:8787 (前端+API)"
-echo "生产环境: https://aisearch.tsaitang.workers.dev (前端+API)"
+echo "生产环境: https://neoai.tsaitang.workers.dev (前端+API)"
 echo "✨ 一个Worker同时处理前端页面和API请求"

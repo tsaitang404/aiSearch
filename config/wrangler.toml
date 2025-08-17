@@ -1,4 +1,4 @@
-name = "aisearch"
+name = "neoai"
 main = "../src/worker/index.js"
 compatibility_date = "2024-01-01"
 
@@ -12,7 +12,7 @@ port = 8787
 
 # 自定义域名配置 (可选)
 # 您可以通过Cloudflare Dashboard配置自定义域名
-# 例如: search.yourdomain.com → aisearch
+# 例如: search.yourdomain.com → neoai
 
 # 您可以在这里配置KV、D1数据库或其他Cloudflare资源
 # [[kv_namespaces]]

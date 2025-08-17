@@ -19,24 +19,24 @@ fi
 
 # 获取Worker信息
 echo "📋 Worker配置信息："
-echo "Worker名称: aisearch (单Worker架构)"
-echo "预期URL: https://aisearch.your-subdomain.workers.dev"
+echo "Worker名称: neoai (单Worker架构)"
+echo "预期URL: https://neoai.tsaitang.workers.dev"
 
 # 检查Worker是否存在
-if wrangler list | grep -q "aisearch"; then
-    echo "✅ Worker 'aisearch' 已部署"
+if wrangler list | grep -q "neoai"; then
+    echo "✅ Worker 'neoai' 已部署"
     
     # 尝试测试连接
     echo "🧪 测试Worker连接..."
-    if curl -s -f "https://aisearch.your-subdomain.workers.dev" > /dev/null; then
+    if curl -s -f "https://neoai.tsaitang.workers.dev" > /dev/null; then
         echo "✅ Worker响应正常"
-        echo "🌐 前端页面: https://aisearch.your-subdomain.workers.dev"
-        echo "🔧 API接口: https://aisearch.your-subdomain.workers.dev/api"
+        echo "🌐 前端页面: https://neoai.tsaitang.workers.dev"
+        echo "🔧 API接口: https://neoai.tsaitang.workers.dev/api"
     else
         echo "⚠️  Worker可能尚未完全部署或配置有误"
     fi
 else
-    echo "⚠️  Worker 'aisearch' 尚未部署"
+    echo "⚠️  Worker 'neoai' 尚未部署"
     echo "💡 使用以下命令部署："
     echo "npm run deploy"
 fi
@@ -44,5 +44,5 @@ fi
 echo ""
 echo "📝 单Worker架构说明："
 echo "本地开发: http://localhost:8787 (前端+API)"
-echo "生产环境: https://aisearch.your-subdomain.workers.dev (前端+API)"
+echo "生产环境: https://neoai.tsaitang.workers.dev (前端+API)"
 echo "✨ 一个Worker同时处理前端页面和API请求"
