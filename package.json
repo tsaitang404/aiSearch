@@ -8,7 +8,8 @@
     "dev:worker": "wrangler dev src/worker/index.js",
     "dev:pages": "wrangler pages dev pages --port 8788",
     "deploy:worker": "wrangler deploy src/worker/index.js",
-    "pages:deploy": "wrangler pages deploy pages",
+    "deploy:pages": "wrangler pages deploy pages",
+    "deploy": "npm run deploy:worker && npm run deploy:pages",
     "start": "./dev-start.sh"
   },
   "author": "",

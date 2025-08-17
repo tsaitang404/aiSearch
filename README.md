@@ -67,16 +67,49 @@ npm run dev
 npm run pages:dev
 ```
 
-## 部署
+## 部署到 Cloudflare
 
-### 部署Worker
+### 方法1: 使用 Git 仓库部署（推荐）
 
+#### 1. Worker 部署
+1. 登录 [Cloudflare Dashboard](https://dash.cloudflare.com)
+2. 进入 **Workers & Pages**
+3. 点击 **Create Application** > **Create Worker**
+4. 选择 **Deploy with Wrangler** 或直接使用命令：
+   ```bash
+   npm run deploy:worker
+   ```
+
+#### 2. Pages 部署
+1. 在 Cloudflare Dashboard 进入 **Workers & Pages**
+2. 点击 **Create Application** > **Pages** > **Connect to Git**
+3. 连接您的 GitHub/GitLab 仓库
+4. 配置构建设置：
+   - **Build command**: 留空（静态文件）
+   - **Build output directory**: `pages`
+   - **Root directory**: 留空
+5. 点击 **Save and Deploy**
+
+#### 3. 配置环境变量
+在 Worker 部署后，配置 API 密钥：
+```bash
+npx wrangler secret put API_KEY
+```
+
+#### 4. 更新前端配置
+部署完成后，更新 `pages/app.js` 中的 `WORKER_API_URL` 为您的 Worker URL：
+```javascript
+const WORKER_API_URL = "https://autorag-worker.your-subdomain.workers.dev";
+```
+
+### 方法2: 手动部署
+
+#### Worker 部署
 ```bash
 npm run deploy:worker
 ```
 
-### 部署Pages
-
+#### Pages 部署
 ```bash
 npm run pages:deploy
 ```
