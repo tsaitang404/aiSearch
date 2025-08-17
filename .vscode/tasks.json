@@ -1,0 +1,37 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "安装依赖",
+      "type": "shell",
+      "command": "npm install",
+      "problemMatcher": []
+    },
+    {
+      "label": "启动Worker开发服务器",
+      "type": "shell",
+      "command": "npm run dev",
+      "problemMatcher": [],
+      "isBackground": true
+    },
+    {
+      "label": "启动Pages开发服务器",
+      "type": "shell",
+      "command": "npm run pages:dev",
+      "problemMatcher": [],
+      "isBackground": true
+    },
+    {
+      "label": "部署Worker",
+      "type": "shell",
+      "command": "npm run deploy:worker",
+      "problemMatcher": []
+    },
+    {
+      "label": "部署Pages",
+      "type": "shell",
+      "command": "npm run deploy:pages",
+      "problemMatcher": []
+    }
+  ]
+}

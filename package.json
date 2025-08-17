@@ -1,0 +1,17 @@
+{
+  "name": "cloudflare-autorag",
+  "version": "1.0.0",
+  "description": "Cloudflare Worker and Pages application for AutoRAG integration",
+  "main": "src/worker/index.js",
+  "scripts": {
+    "dev": "wrangler dev src/worker/index.js",
+    "deploy:worker": "wrangler deploy src/worker/index.js",
+    "pages:dev": "wrangler pages dev pages",
+    "pages:deploy": "wrangler pages deploy pages"
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "wrangler": "^3.30.0"
+  }
+}

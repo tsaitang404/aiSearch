@@ -1,0 +1,22 @@
+name = "autorag-worker"
+main = "src/worker/index.js"
+compatibility_date = "2024-01-01"
+
+# 您可以在这里添加自定义域名
+# routes = [
+#   { pattern = "api.yourdomain.com/*", zone_name = "yourdomain.com" }
+# ]
+
+# 环境变量配置
+[vars]
+# AUTO_RAG_API_URL = "https://your-autorag-api.workers.dev"
+# 不要在这里直接配置API_KEY，应使用秘密变量
+
+# 开发环境配置
+[dev]
+port = 8787
+
+# 您可以在这里配置KV、D1数据库或其他Cloudflare资源
+# [[kv_namespaces]]
+# binding = "MY_KV"
+# id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
