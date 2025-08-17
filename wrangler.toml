@@ -10,11 +10,12 @@ binding = "AI"
 pages_build_output_dir = "pages"
 
 # 自定义子域名配置
-# 部署后将使用: https://aisearch.tsaitang404.workers.dev
+# Worker API: https://ai-search.tsaitang.workers.dev
+# Pages前端: https://search.tsaitang.workers.dev
 
 # 您可以在这里添加自定义域名
 # routes = [
-#   { pattern = "api.yourdomain.com/*", zone_name = "yourdomain.com" }
+#   { pattern = "search.tsaitang.workers.dev/*", zone_name = "tsaitang.workers.dev" }
 # ]
 
 # 环境变量配置

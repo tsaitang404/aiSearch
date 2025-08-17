@@ -6,10 +6,12 @@
   "scripts": {
     "dev": "wrangler dev src/worker/index.js",
     "dev:worker": "wrangler dev src/worker/index.js",
+    "dev:frontend": "wrangler dev --config wrangler-frontend.toml",
     "dev:pages": "wrangler pages dev pages --port 8788",
     "deploy:worker": "wrangler deploy src/worker/index.js",
+    "deploy:frontend": "wrangler deploy --config wrangler-frontend.toml",
     "deploy:pages": "wrangler pages deploy pages",
-    "deploy": "npm run deploy:worker && npm run deploy:pages",
+    "deploy": "npm run deploy:worker && npm run deploy:frontend",
     "get-worker-url": "./scripts/get-worker-url.sh",
     "start": "./dev-start.sh"
   },
