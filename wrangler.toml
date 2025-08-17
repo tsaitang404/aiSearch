@@ -1,4 +1,4 @@
-name = "ai-search"
+name = "api-backend"
 main = "src/worker/index.js"
 compatibility_date = "2024-01-01"
 
@@ -10,8 +10,9 @@ binding = "AI"
 pages_build_output_dir = "pages"
 
 # 自定义子域名配置
-# Worker API: https://ai-search.tsaitang.workers.dev
-# Pages前端: https://search.tsaitang.workers.dev
+# API后端: https://api-backend.tsaitang.workers.dev (默认)
+#          https://api.search.tsaitang.workers.dev (自定义域名)
+# 前端页面: https://search.tsaitang.workers.dev
 
 # 您可以在这里添加自定义域名
 # routes = [

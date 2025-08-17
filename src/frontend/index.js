@@ -254,8 +254,8 @@ const HTML_CONTENT = `<!DOCTYPE html>
     </div>
     
     <script>
-        // 配置 - 使用AI Search API Worker
-        const WORKER_API_URL = "https://ai-search.tsaitang.workers.dev";
+        // 配置 - 使用API后端Worker
+        const WORKER_API_URL = "https://api.search.tsaitang.workers.dev";
 
         // DOM元素
         const queryInput = document.getElementById('queryInput');
