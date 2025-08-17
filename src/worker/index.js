@@ -11,6 +11,16 @@ const CONFIG = {
   LLM_MODEL: "@cf/meta/llama-2-7b-chat-int8",
   MAX_REQUEST_SIZE: 1024 * 1024, // 1MB
   CACHE_TTL: 3600, // 1 hour
+  // 可用的回落模型列表
+  FALLBACK_MODELS: {
+    "@cf/meta/llama-2-7b-chat-int8": "Llama 2 7B (默认)",
+    "@cf/mistral/mistral-7b-instruct-v0.1": "Mistral 7B Instruct",
+    "@cf/meta/llama-2-7b-chat-fp16": "Llama 2 7B FP16",
+    "@cf/microsoft/phi-2": "Microsoft Phi-2",
+    "@cf/qwen/qwen1.5-0.5b-chat": "Qwen 1.5 0.5B Chat",
+    "@cf/qwen/qwen1.5-1.8b-chat": "Qwen 1.5 1.8B Chat",
+    "@cf/qwen/qwen1.5-7b-chat-awq": "Qwen 1.5 7B Chat AWQ"
+  }
 };
 
 // HTML内容
@@ -187,6 +197,37 @@ const HTML_CONTENT = `<!DOCTYPE html>
             margin-right: 10px;
         }
 
+        /* 模型信息显示 */
+        .model-info {
+            background-color: #f0f9ff;
+            border: 1px solid #0ea5e9;
+            border-radius: 6px;
+            padding: 8px 12px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .model-label {
+            font-weight: 500;
+            color: #0369a1;
+        }
+
+        .model-name {
+            background-color: #0ea5e9;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .model-name.fallback {
+            background-color: #f59e0b;
+        }
+
         /* 加载指示器 */
         .loading {
             display: flex;
@@ -230,6 +271,25 @@ const HTML_CONTENT = `<!DOCTYPE html>
             <h3>高级选项 <span class="toggle-options">(展开)</span></h3>
             <div class="options-panel hidden">
                 <div class="option-group">
+                    <label for="useAutoRAG">使用AutoRAG:</label>
+                    <select id="useAutoRAG">
+                        <option value="true">是 (优先使用AutoRAG)</option>
+                        <option value="false">否 (直接使用回落模型)</option>
+                    </select>
+                </div>
+                <div class="option-group">
+                    <label for="fallbackModel">回落模型选择:</label>
+                    <select id="fallbackModel">
+                        <option value="@cf/meta/llama-2-7b-chat-int8">Llama 2 7B (默认)</option>
+                        <option value="@cf/mistral/mistral-7b-instruct-v0.1">Mistral 7B Instruct</option>
+                        <option value="@cf/meta/llama-2-7b-chat-fp16">Llama 2 7B FP16</option>
+                        <option value="@cf/microsoft/phi-2">Microsoft Phi-2</option>
+                        <option value="@cf/qwen/qwen1.5-0.5b-chat">Qwen 1.5 0.5B Chat</option>
+                        <option value="@cf/qwen/qwen1.5-1.8b-chat">Qwen 1.5 1.8B Chat</option>
+                        <option value="@cf/qwen/qwen1.5-7b-chat-awq">Qwen 1.5 7B Chat AWQ</option>
+                    </select>
+                </div>
+                <div class="option-group">
                     <label for="maxTokens">最大生成令牌数:</label>
                     <input type="number" id="maxTokens" value="500" min="1" max="2000">
                 </div>
@@ -251,6 +311,10 @@ const HTML_CONTENT = `<!DOCTYPE html>
         
         <div class="results-container hidden" id="resultsContainer">
             <h2>查询结果</h2>
+            <div class="model-info" id="modelInfo">
+                <span class="model-label">使用模型:</span>
+                <span class="model-name" id="currentModel">AutoRAG</span>
+            </div>
             <div class="loading hidden" id="loadingIndicator">
                 <div class="spinner"></div>
                 <p>正在处理您的查询...</p>
@@ -312,9 +376,11 @@ const HTML_CONTENT = `<!DOCTYPE html>
             
             // 获取高级选项
             const options = {
+                use_autorag: document.getElementById('useAutoRAG').value === 'true',
                 max_tokens: parseInt(document.getElementById('maxTokens').value),
                 temperature: parseFloat(document.getElementById('temperature').value),
-                retrieval_mode: document.getElementById('retrievalMode').value
+                retrieval_mode: document.getElementById('retrievalMode').value,
+                fallback_model: document.getElementById('fallbackModel').value
             };
             
             // 显示加载状态
@@ -356,6 +422,34 @@ const HTML_CONTENT = `<!DOCTYPE html>
         function displayResults(data) {
             // 显示结果容器
             resultsContainer.classList.remove('hidden');
+            
+            // 显示当前使用的模型
+            const currentModelElement = document.getElementById('currentModel');
+            if (data.model_used) {
+                if (data.model_used === 'autorag') {
+                    currentModelElement.textContent = 'AutoRAG';
+                    currentModelElement.className = 'model-name';
+                } else if (data.model_used === 'mock_autorag') {
+                    currentModelElement.textContent = 'AutoRAG (模拟)';
+                    currentModelElement.className = 'model-name';
+                } else {
+                    // 显示回落模型名称
+                    const modelNames = {
+                        "@cf/meta/llama-2-7b-chat-int8": "Llama 2 7B",
+                        "@cf/mistral/mistral-7b-instruct-v0.1": "Mistral 7B",
+                        "@cf/meta/llama-2-7b-chat-fp16": "Llama 2 7B FP16",
+                        "@cf/microsoft/phi-2": "Phi-2",
+                        "@cf/qwen/qwen1.5-0.5b-chat": "Qwen 0.5B",
+                        "@cf/qwen/qwen1.5-1.8b-chat": "Qwen 1.8B",
+                        "@cf/qwen/qwen1.5-7b-chat-awq": "Qwen 7B AWQ"
+                    };
+                    currentModelElement.textContent = modelNames[data.model_used] || data.model_used;
+                    currentModelElement.className = 'model-name fallback';
+                }
+            } else {
+                currentModelElement.textContent = '未知';
+                currentModelElement.className = 'model-name';
+            }
             
             // 显示回答
             if (data.answer || data.response) {
@@ -490,20 +584,63 @@ export default {
         if (env.AI) {
           console.log("调用Cloudflare Workers AI，查询:", query);
           
+          // 获取用户选择的回落模型，如果没有选择则使用默认模型
+          const fallbackModel = options?.fallback_model || CONFIG.LLM_MODEL;
+          const useAutoRAG = options?.use_autorag !== false; // 默认使用AutoRAG
+          
           try {
-            // 先尝试AutoRAG（如果可用）
             let answer;
-            try {
-              answer = await env.AI.autorag("jolly-water-bbff").aiSearch({
-                query: query,
-                // 可以添加其他选项参数
-                ...options
-              });
-            } catch (autoragError) {
-              console.log("AutoRAG不可用，使用标准AI模型:", autoragError.message);
+            let modelUsed;
+            
+            // 根据用户选择决定是否尝试AutoRAG
+            if (useAutoRAG) {
+              try {
+                answer = await env.AI.autorag(CONFIG.AUTO_RAG_INSTANCE).aiSearch({
+                  query: query,
+                  // 传递其他选项参数（排除fallback_model和use_autorag）
+                  ...Object.fromEntries(
+                    Object.entries(options || {}).filter(([key]) => 
+                      key !== 'fallback_model' && key !== 'use_autorag')
+                  )
+                });
+                
+                modelUsed = 'autorag';
+                // 为AutoRAG响应添加模型信息
+                answer.model_used = modelUsed;
+                
+              } catch (autoragError) {
+                console.log(`AutoRAG不可用，使用回落模型: ${fallbackModel}`, autoragError.message);
+                
+                // AutoRAG失败，使用回落模型
+                modelUsed = fallbackModel;
+                const response = await env.AI.run(fallbackModel, {
+                  messages: [
+                    {
+                      role: "system",
+                      content: "你是一个智能搜索助手，请根据用户的查询提供有用的回答。"
+                    },
+                    {
+                      role: "user", 
+                      content: query
+                    }
+                  ],
+                  // 传递温度和最大token等参数
+                  ...(options?.temperature && { temperature: options.temperature }),
+                  ...(options?.max_tokens && { max_tokens: options.max_tokens })
+                });
+                
+                answer = {
+                  answer: response.response || "抱歉，无法生成回答",
+                  sources: [`基于${CONFIG.FALLBACK_MODELS[fallbackModel] || fallbackModel}生成的回答`],
+                  model_used: modelUsed
+                };
+              }
+            } else {
+              // 用户选择直接使用回落模型
+              console.log(`用户选择直接使用回落模型: ${fallbackModel}`);
+              modelUsed = fallbackModel;
               
-              // 如果AutoRAG不可用，使用标准的LLM模型
-              const response = await env.AI.run("@cf/meta/llama-2-7b-chat-int8", {
+              const response = await env.AI.run(fallbackModel, {
                 messages: [
                   {
                     role: "system",
@@ -513,12 +650,16 @@ export default {
                     role: "user", 
                     content: query
                   }
-                ]
+                ],
+                // 传递温度和最大token等参数
+                ...(options?.temperature && { temperature: options.temperature }),
+                ...(options?.max_tokens && { max_tokens: options.max_tokens })
               });
               
               answer = {
                 answer: response.response || "抱歉，无法生成回答",
-                sources: ["基于AI生成的回答"]
+                sources: [`基于${CONFIG.FALLBACK_MODELS[fallbackModel] || fallbackModel}生成的回答`],
+                model_used: modelUsed
               };
             }
 
@@ -546,7 +687,8 @@ export default {
               "模拟数据源 1",
               "模拟数据源 2", 
               "模拟数据源 3"
-            ]
+            ],
+            model_used: 'mock_autorag'
           };
           
           return new Response(JSON.stringify(mockResponse), {
