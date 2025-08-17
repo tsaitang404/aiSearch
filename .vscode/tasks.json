@@ -15,22 +15,9 @@
       "isBackground": true
     },
     {
-      "label": "启动Pages开发服务器",
-      "type": "shell",
-      "command": "npm run pages:dev",
-      "problemMatcher": [],
-      "isBackground": true
-    },
-    {
       "label": "部署Worker",
       "type": "shell",
-      "command": "npm run deploy:worker",
-      "problemMatcher": []
-    },
-    {
-      "label": "部署Pages",
-      "type": "shell",
-      "command": "npm run deploy:pages",
+      "command": "npm run deploy",
       "problemMatcher": []
     }
   ]
