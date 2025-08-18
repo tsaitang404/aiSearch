@@ -2,7 +2,7 @@
 
 ## 概述
 
-这个项目配置了GitHub Actions工作流，可以在推送`v0.1.xxx`版本标签时自动部署到Cloudflare Worker。
+这个项目配置了GitHub Actions工作流，可以在推送任何`v*`版本标签时自动部署到Cloudflare Worker。
 
 ## 配置步骤
 
@@ -33,15 +33,18 @@
 
 ### 2. 如何触发自动部署
 
-自动部署会在推送符合`v0.1.xxx`格式的Git标签时触发：
+自动部署会在推送符合`v*`格式的Git标签时触发：
 
 ```bash
-# 创建并推送标签
-git tag v0.1.0
-git push origin v0.1.0
+# 创建并推送标签（支持任何版本格式）
+git tag v1.0.0
+git push origin v1.0.0
 
 # 或者一行命令
-git tag v0.1.1 && git push origin v0.1.1
+git tag v2.1.3 && git push origin v2.1.3
+
+# 支持预发布版本
+git tag v1.0.0-beta.1 && git push origin v1.0.0-beta.1
 ```
 
 ### 3. 部署流程
@@ -82,7 +85,7 @@ npm run deploy
 
 ## 注意事项
 
-- 只有`v0.1.xxx`格式的标签会触发自动部署
+- 任何以`v`开头的标签都会触发自动部署（如v1.0.0, v2.1.3, v1.0.0-beta.1等）
 - 确保所有必需的环境变量和Secrets都已正确配置
 - 部署前建议在开发环境充分测试
 - 如果部署失败，检查Actions日志获取详细错误信息

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# 自动创建和推送v0.1.x版本标签的脚本
+# 自动创建和推送版本标签的脚本
 
 # 颜色定义
 GREEN='\033[0;32m'
@@ -29,21 +29,30 @@ if [ -n "$(git status --porcelain)" ]; then
     fi
 fi
 
-# 获取当前的v0.1.x标签
-CURRENT_TAGS=$(git tag -l "v0.1.*" | sort -V | tail -5)
-echo -e "${YELLOW}📋 最近的v0.1.x标签：${NC}"
+# 获取当前的版本标签
+CURRENT_TAGS=$(git tag -l "v*" | sort -V | tail -5)
+echo -e "${YELLOW}📋 最近的版本标签：${NC}"
 if [ -z "$CURRENT_TAGS" ]; then
     echo "  (无)"
-    NEXT_VERSION="v0.1.0"
+    NEXT_VERSION="v1.0.0"
 else
     echo "$CURRENT_TAGS"
     echo ""
     
-    # 获取最新标签并计算下一个版本
+    # 获取最新标签并提取版本号
     LATEST_TAG=$(echo "$CURRENT_TAGS" | tail -1)
-    LATEST_PATCH=$(echo "$LATEST_TAG" | sed 's/v0\.1\.//')
-    NEXT_PATCH=$((LATEST_PATCH + 1))
-    NEXT_VERSION="v0.1.${NEXT_PATCH}"
+    echo -e "${GREEN}最新标签: ${LATEST_TAG}${NC}"
+    
+    # 根据最新标签建议下一个版本
+    if [[ $LATEST_TAG =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+) ]]; then
+        MAJOR=${BASH_REMATCH[1]}
+        MINOR=${BASH_REMATCH[2]}
+        PATCH=${BASH_REMATCH[3]}
+        NEXT_PATCH=$((PATCH + 1))
+        NEXT_VERSION="v${MAJOR}.${MINOR}.${NEXT_PATCH}"
+    else
+        NEXT_VERSION="v1.0.0"
+    fi
 fi
 
 echo ""
@@ -57,8 +66,8 @@ if [ -z "$VERSION" ]; then
 fi
 
 # 验证版本号格式
-if [[ ! $VERSION =~ ^v0\.1\.[0-9]+$ ]]; then
-    echo -e "${RED}❌ 版本号格式不正确，应该是 v0.1.x 格式${NC}"
+if [[ ! $VERSION =~ ^v[0-9]+\.[0-9]+\.[0-9]+([+-][a-zA-Z0-9.-]*)?$ ]]; then
+    echo -e "${RED}❌ 版本号格式不正确，应该是 vX.Y.Z 格式 (例如: v1.0.0, v2.1.3, v1.0.0-beta.1)${NC}"
     exit 1
 fi
 
