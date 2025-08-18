@@ -150,6 +150,175 @@ export const HTML_CONTENT = `<!DOCTYPE html>
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
         }
 
+        /* 用户界面样式 */
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #2d3748;
+            font-size: 14px;
+        }
+
+        .user-info .username {
+            font-weight: 600;
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .auth-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .auth-btn.primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .auth-btn.secondary {
+            background: rgba(255, 255, 255, 0.8);
+            color: #2d3748;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .auth-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* 认证模态框 */
+        .auth-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .auth-modal.hidden {
+            display: none;
+        }
+
+        .auth-form {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .auth-form h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #2d3748;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #4a5568;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        .form-buttons button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .form-buttons .primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .form-buttons .secondary {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+
+        .form-buttons button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .error-message {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .success-message {
+            background: #c6f6d5;
+            color: #2f855a;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
         /* 聊天容器 */
         .chat-container {
             flex: 1;
@@ -1288,14 +1457,80 @@ export const HTML_CONTENT = `<!DOCTYPE html>
 </head>
 <body>
     <div class="header">
-        <h1>NeoAI 智能对话</h1>
-        <div class="model-indicator">
-            <span>当前模型:</span>
-            <span class="model-badge" id="currentModelBadge">AutoRAG</span>
+        <div class="header-left">
+            <h1>NeoAI 智能对话</h1>
+            <div class="model-indicator">
+                <span>当前模型:</span>
+                <span class="model-badge" id="currentModelBadge">AutoRAG</span>
+            </div>
         </div>
-        <button class="settings-btn" id="settingsBtn" title="设置">
-            ⚙️
-        </button>
+        <div class="header-right">
+            <!-- 已登录用户信息 -->
+            <div id="userInfo" class="user-info hidden">
+                <span>👋 您好, <span class="username" id="username"></span></span>
+                <button class="auth-btn secondary" id="logoutBtn">登出</button>
+            </div>
+            <!-- 未登录时的按钮 -->
+            <div id="authButtons" class="auth-buttons">
+                <button class="auth-btn secondary" id="loginBtn">登录</button>
+                <button class="auth-btn primary" id="registerBtn">注册</button>
+            </div>
+            <button class="settings-btn" id="settingsBtn" title="设置">
+                ⚙️
+            </button>
+        </div>
+    </div>
+
+    <!-- 登录模态框 -->
+    <div id="loginModal" class="auth-modal hidden">
+        <div class="auth-form">
+            <h2>用户登录</h2>
+            <div id="loginError" class="error-message hidden"></div>
+            <div id="loginSuccess" class="success-message hidden"></div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginIdentifier">用户名或邮箱</label>
+                    <input type="text" id="loginIdentifier" name="identifier" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">密码</label>
+                    <input type="password" id="loginPassword" name="password" required>
+                </div>
+                <div class="form-buttons">
+                    <button type="button" class="secondary" id="loginCancelBtn">取消</button>
+                    <button type="submit" class="primary">登录</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 注册模态框 -->
+    <div id="registerModal" class="auth-modal hidden">
+        <div class="auth-form">
+            <h2>用户注册</h2>
+            <div id="registerError" class="error-message hidden"></div>
+            <div id="registerSuccess" class="success-message hidden"></div>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="registerUsername">用户名</label>
+                    <input type="text" id="registerUsername" name="username" required 
+                           placeholder="3-20个字符，只能包含字母、数字、下划线">
+                </div>
+                <div class="form-group">
+                    <label for="registerEmail">邮箱</label>
+                    <input type="email" id="registerEmail" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerPassword">密码</label>
+                    <input type="password" id="registerPassword" name="password" required 
+                           placeholder="至少6位，包含字母和数字">
+                </div>
+                <div class="form-buttons">
+                    <button type="button" class="secondary" id="registerCancelBtn">取消</button>
+                    <button type="submit" class="primary">注册</button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <div class="chat-container">
@@ -1396,6 +1631,7 @@ export const HTML_CONTENT = `<!DOCTYPE html>
 
         // 全局变量
         let isLoading = false;
+        let currentUser = null; // 当前登录用户信息
         let currentSettings = {
             useAutoRAG: true,
             fallbackModel: '@cf/meta/llama-2-7b-chat-int8',
@@ -1409,6 +1645,11 @@ export const HTML_CONTENT = `<!DOCTYPE html>
         let currentModelBadge, useAutoRAGSelect, fallbackModelSelect;
         let temperatureSlider, temperatureValue, maxTokensInput;
         let scrollToBottomBtn, modelIndicator, modelSwitchModal, closeModelSwitchBtn;
+        
+        // 认证相关DOM元素
+        let userInfo, authButtons, loginBtn, registerBtn, logoutBtn;
+        let loginModal, registerModal, loginForm, registerForm;
+        let loginError, loginSuccess, registerError, registerSuccess;
 
         /**
          * 初始化应用
@@ -1421,6 +1662,7 @@ export const HTML_CONTENT = `<!DOCTYPE html>
             setupAutoResize();
             setupImageClickHandlers();
             initializeMarkdown();
+            checkUserAuth(); // 检查用户登录状态
         });
 
         /**
@@ -1493,6 +1735,23 @@ export const HTML_CONTENT = `<!DOCTYPE html>
             modelIndicator = document.querySelector('.model-indicator');
             modelSwitchModal = document.getElementById('modelSwitchModal');
             closeModelSwitchBtn = document.getElementById('closeModelSwitchBtn');
+            
+            // 认证相关元素
+            userInfo = document.getElementById('userInfo');
+            authButtons = document.getElementById('authButtons');
+            loginBtn = document.getElementById('loginBtn');
+            registerBtn = document.getElementById('registerBtn');
+            logoutBtn = document.getElementById('logoutBtn');
+            
+            loginModal = document.getElementById('loginModal');
+            registerModal = document.getElementById('registerModal');
+            loginForm = document.getElementById('loginForm');
+            registerForm = document.getElementById('registerForm');
+            
+            loginError = document.getElementById('loginError');
+            loginSuccess = document.getElementById('loginSuccess');
+            registerError = document.getElementById('registerError');
+            registerSuccess = document.getElementById('registerSuccess');
         }
 
         /**
@@ -1535,6 +1794,84 @@ export const HTML_CONTENT = `<!DOCTYPE html>
             modelSwitchModal.addEventListener('click', function(e) {
                 if (e.target === modelSwitchModal) {
                     closeModelSwitchModal();
+                }
+            });
+            
+            // 认证相关事件监听
+            setupAuthEventListeners();
+        }
+
+        /**
+         * 设置认证相关事件监听器
+         */
+        function setupAuthEventListeners() {
+            // 登录按钮
+            if (loginBtn) {
+                loginBtn.addEventListener('click', showLoginModal);
+            }
+            
+            // 注册按钮
+            if (registerBtn) {
+                registerBtn.addEventListener('click', showRegisterModal);
+            }
+            
+            // 登出按钮
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', handleLogout);
+            }
+            
+            // 登录表单提交
+            if (loginForm) {
+                loginForm.addEventListener('submit', handleLogin);
+            }
+            
+            // 注册表单提交
+            if (registerForm) {
+                registerForm.addEventListener('submit', handleRegister);
+            }
+            
+            // 模态框关闭事件
+            setupModalCloseEvents();
+        }
+
+        /**
+         * 设置模态框关闭事件
+         */
+        function setupModalCloseEvents() {
+            // 登录模态框关闭
+            const loginCancelBtn = document.getElementById('loginCancelBtn');
+            if (loginCancelBtn) {
+                loginCancelBtn.addEventListener('click', hideLoginModal);
+            }
+            
+            // 注册模态框关闭
+            const registerCancelBtn = document.getElementById('registerCancelBtn');
+            if (registerCancelBtn) {
+                registerCancelBtn.addEventListener('click', hideRegisterModal);
+            }
+            
+            // 点击模态框背景关闭
+            if (loginModal) {
+                loginModal.addEventListener('click', function(e) {
+                    if (e.target === loginModal) {
+                        hideLoginModal();
+                    }
+                });
+            }
+            
+            if (registerModal) {
+                registerModal.addEventListener('click', function(e) {
+                    if (e.target === registerModal) {
+                        hideRegisterModal();
+                    }
+                });
+            }
+            
+            // ESC键关闭模态框
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    hideLoginModal();
+                    hideRegisterModal();
                 }
             });
         }
@@ -2287,6 +2624,244 @@ export const HTML_CONTENT = `<!DOCTYPE html>
 
             // 关闭弹窗
             closeModelSwitchModal();
+        }
+
+        // ==================== 认证相关函数 ====================
+
+        /**
+         * 检查用户认证状态
+         */
+        async function checkUserAuth() {
+            try {
+                const response = await fetch('/api/auth/profile', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success) {
+                        currentUser = data.user;
+                        updateAuthUI(true);
+                        return;
+                    }
+                }
+                
+                // 用户未登录
+                currentUser = null;
+                updateAuthUI(false);
+            } catch (error) {
+                console.log('认证状态检查失败:', error);
+                updateAuthUI(false);
+            }
+        }
+
+        /**
+         * 更新认证UI状态
+         * @param {boolean} isLoggedIn - 是否已登录
+         */
+        function updateAuthUI(isLoggedIn) {
+            if (isLoggedIn && currentUser) {
+                // 已登录状态
+                userInfo.classList.remove('hidden');
+                authButtons.classList.add('hidden');
+                document.getElementById('username').textContent = currentUser.username;
+            } else {
+                // 未登录状态
+                userInfo.classList.add('hidden');
+                authButtons.classList.remove('hidden');
+            }
+        }
+
+        /**
+         * 显示登录模态框
+         */
+        function showLoginModal() {
+            clearAuthMessages();
+            loginModal.classList.remove('hidden');
+            document.getElementById('loginIdentifier').focus();
+        }
+
+        /**
+         * 隐藏登录模态框
+         */
+        function hideLoginModal() {
+            loginModal.classList.add('hidden');
+            clearAuthMessages();
+            loginForm.reset();
+        }
+
+        /**
+         * 显示注册模态框
+         */
+        function showRegisterModal() {
+            clearAuthMessages();
+            registerModal.classList.remove('hidden');
+            document.getElementById('registerUsername').focus();
+        }
+
+        /**
+         * 隐藏注册模态框
+         */
+        function hideRegisterModal() {
+            registerModal.classList.add('hidden');
+            clearAuthMessages();
+            registerForm.reset();
+        }
+
+        /**
+         * 清除认证消息
+         */
+        function clearAuthMessages() {
+            [loginError, loginSuccess, registerError, registerSuccess].forEach(el => {
+                if (el) {
+                    el.classList.add('hidden');
+                    el.textContent = '';
+                }
+            });
+        }
+
+        /**
+         * 显示认证错误消息
+         * @param {HTMLElement} element - 错误元素
+         * @param {string} message - 错误消息
+         */
+        function showAuthError(element, message) {
+            element.textContent = message;
+            element.classList.remove('hidden');
+        }
+
+        /**
+         * 显示认证成功消息
+         * @param {HTMLElement} element - 成功元素
+         * @param {string} message - 成功消息
+         */
+        function showAuthSuccess(element, message) {
+            element.textContent = message;
+            element.classList.remove('hidden');
+        }
+
+        /**
+         * 处理用户登录
+         * @param {Event} event - 表单提交事件
+         */
+        async function handleLogin(event) {
+            event.preventDefault();
+            clearAuthMessages();
+
+            const formData = new FormData(loginForm);
+            const data = {
+                identifier: formData.get('identifier'),
+                password: formData.get('password')
+            };
+
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showAuthSuccess(loginSuccess, result.message);
+                    currentUser = result.user;
+                    setTimeout(() => {
+                        hideLoginModal();
+                        updateAuthUI(true);
+                    }, 1500);
+                } else {
+                    showAuthError(loginError, result.error);
+                }
+            } catch (error) {
+                console.error('登录失败:', error);
+                showAuthError(loginError, '登录失败，请检查网络连接');
+            }
+        }
+
+        /**
+         * 处理用户注册
+         * @param {Event} event - 表单提交事件
+         */
+        async function handleRegister(event) {
+            event.preventDefault();
+            clearAuthMessages();
+
+            const formData = new FormData(registerForm);
+            const data = {
+                username: formData.get('username'),
+                email: formData.get('email'),
+                password: formData.get('password')
+            };
+
+            try {
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showAuthSuccess(registerSuccess, result.message + '，请登录');
+                    setTimeout(() => {
+                        hideRegisterModal();
+                        showLoginModal();
+                    }, 1500);
+                } else {
+                    showAuthError(registerError, result.error);
+                }
+            } catch (error) {
+                console.error('注册失败:', error);
+                showAuthError(registerError, '注册失败，请检查网络连接');
+            }
+        }
+
+        /**
+         * 处理用户登出
+         */
+        async function handleLogout() {
+            try {
+                const response = await fetch('/api/auth/logout', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+
+                // 无论请求是否成功，都清除本地状态
+                currentUser = null;
+                updateAuthUI(false);
+                
+                // 可以选择刷新页面来清理所有状态
+                // window.location.reload();
+                
+            } catch (error) {
+                console.error('登出失败:', error);
+                // 即使登出请求失败，也清除本地状态
+                currentUser = null;
+                updateAuthUI(false);
+            }
+        }
+
+        /**
+         * 获取带认证信息的请求头
+         * @returns {Object} 请求头对象
+         */
+        function getAuthHeaders() {
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            
+            // 如果用户已登录，添加认证信息
+            // 由于我们使用Cookie认证，浏览器会自动包含cookies
+            
+            return headers;
         }
     </script>
 </body>

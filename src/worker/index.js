@@ -13,7 +13,8 @@
 
 // 导入模块
 import { HTML_CONTENT } from '../templates/html.js';
-import { handleChatAPI, handleModelsAPI, handleHealthAPI } from '../routes/api.js';
+import { handleChatAPI, handleModelsAPI, handleHealthAPI, handleChatHistoryAPI } from '../routes/api.js';
+import { handleRegister, handleLogin, handleLogout, handleProfile } from '../routes/auth.js';
 import { corsHeaders, handleCORS } from '../utils/cors.js';
 import { logRequest, logError } from '../utils/logger.js';
 import { APP_NAME } from '../config.js';
@@ -122,7 +123,12 @@ function getAPIHandler(pathname) {
     const handlers = {
         '/api/chat': handleChatAPI,
         '/api/models': handleModelsAPI,
-        '/api/health': handleHealthAPI
+        '/api/health': handleHealthAPI,
+        '/api/chat-history': handleChatHistoryAPI,
+        '/api/auth/register': handleRegister,
+        '/api/auth/login': handleLogin,
+        '/api/auth/logout': handleLogout,
+        '/api/auth/profile': handleProfile
     };
     return handlers[pathname] || null;
 }

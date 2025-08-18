@@ -1,6 +1,6 @@
 /**
  * API路由处理模块
- * @version 1.0.0
+ * @version 2.0.0
  */
 
 import { corsHeaders, handleCORS } from '../utils/cors.js';
@@ -8,6 +8,8 @@ import { validateInput, validateContentType, parseRequestBody } from '../utils/v
 import { logRequest, logError } from '../utils/logger.js';
 import { getAvailableModels } from '../utils/models.js';
 import { APP_NAME, AUTO_RAG_INSTANCE, FALLBACK_MODELS } from '../config.js';
+import { authenticateUser } from './auth.js';
+import { saveChatHistory, getChatHistory } from '../utils/database.js';
 
 /**
  * 处理聊天API请求
@@ -38,6 +40,9 @@ export async function handleChatAPI(request, env) {
             throw new Error('消息内容无效');
         }
 
+        // 检查用户认证状态（可选，未登录也允许使用）
+        const user = await authenticateUser(request, env);
+        
         let response;
         let sources = [];
         let model = 'AutoRAG';
@@ -47,11 +52,21 @@ export async function handleChatAPI(request, env) {
                 // 尝试使用AutoRAG
                 response = await callAutoRAG(message, env);
                 if (response && response.response) {
+                    // 如果用户已登录，保存聊天记录
+                    if (user && user.id) {
+                        try {
+                            await saveChatHistory(env.DB, user.id, user.sessionId, message, response.response);
+                        } catch (saveError) {
+                            logError('保存聊天记录失败', saveError, 'chat/save');
+                        }
+                    }
+                    
                     return new Response(JSON.stringify({
                         response: response.response,
                         sources: response.sources || [],
                         model: 'AutoRAG',
-                        timestamp: new Date().toISOString()
+                        timestamp: new Date().toISOString(),
+                        user: user ? { username: user.username } : null
                     }), {
                         headers: {
                             'Content-Type': 'application/json',
@@ -73,11 +88,21 @@ export async function handleChatAPI(request, env) {
             throw new Error('所有AI服务暂时不可用，请稍后再试');
         }
 
+        // 如果用户已登录，保存聊天记录
+        if (user && user.id && response) {
+            try {
+                await saveChatHistory(env.DB, user.id, user.sessionId, message, response);
+            } catch (saveError) {
+                logError('保存聊天记录失败', saveError, 'chat/save');
+            }
+        }
+
         return new Response(JSON.stringify({
             response: response,
             sources: sources,
             model: model,
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
+            user: user ? { username: user.username } : null
         }), {
             headers: {
                 'Content-Type': 'application/json',
@@ -286,6 +311,74 @@ export async function handleHealthAPI(request, env) {
         return new Response(JSON.stringify({
             status: 'error',
             error: error.message,
+            timestamp: new Date().toISOString()
+        }), {
+            status: 500,
+            headers: {
+                'Content-Type': 'application/json',
+                ...corsHeaders
+            }
+        });
+    }
+}
+
+/**
+ * 处理聊天历史API请求
+ * @param {Request} request - 请求对象
+ * @param {Object} env - 环境变量
+ * @returns {Response} 响应对象
+ */
+export async function handleChatHistoryAPI(request, env) {
+    try {
+        logRequest(request, 'chat-history');
+
+        if (request.method !== 'GET') {
+            return new Response(JSON.stringify({ error: '方法不允许' }), {
+                status: 405,
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            });
+        }
+
+        // 验证用户认证
+        const user = await authenticateUser(request, env);
+        if (!user || !user.id) {
+            return new Response(JSON.stringify({ error: '未授权，请先登录' }), {
+                status: 401,
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            });
+        }
+
+        // 获取查询参数
+        const url = new URL(request.url);
+        const limit = Math.min(parseInt(url.searchParams.get('limit') || '50'), 100); // 最多100条
+
+        // 获取聊天历史
+        const historyResult = await getChatHistory(env.DB, user.id, limit);
+        if (!historyResult.success) {
+            logError('获取聊天历史失败', historyResult.error, 'chat-history');
+            return new Response(JSON.stringify({ error: '获取聊天历史失败' }), {
+                status: 500,
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            });
+        }
+
+        return new Response(JSON.stringify({
+            success: true,
+            history: historyResult.history,
+            user: { username: user.username },
+            timestamp: new Date().toISOString()
+        }), {
+            headers: {
+                'Content-Type': 'application/json',
+                ...corsHeaders
+            }
+        });
+
+    } catch (error) {
+        logError(error, '聊天历史API处理失败');
+        
+        return new Response(JSON.stringify({
+            error: error.message || '处理请求时发生错误',
             timestamp: new Date().toISOString()
         }), {
             status: 500,
