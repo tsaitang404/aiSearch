@@ -339,6 +339,235 @@ export const HTML_CONTENT = `<!DOCTYPE html>
             color: #3b82f6;
         }
 
+        /* Markdown 内容样式 */
+        .message-content h1, 
+        .message-content h2, 
+        .message-content h3 {
+            margin: 16px 0 8px 0;
+            font-weight: 600;
+            line-height: 1.4;
+        }
+
+        .message-content h1 {
+            font-size: 1.5em;
+            color: #1a202c;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 8px;
+        }
+
+        .message-content h2 {
+            font-size: 1.3em;
+            color: #2d3748;
+        }
+
+        .message-content h3 {
+            font-size: 1.1em;
+            color: #4a5568;
+        }
+
+        /* 代码块样式 */
+        .code-block {
+            position: relative;
+            margin: 12px 0;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .code-language {
+            background: #333;
+            color: #a0a0a0;
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 500;
+            border-bottom: 1px solid #444;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .code-block pre {
+            margin: 0;
+            padding: 16px;
+            background: #1a1a1a;
+            color: #e2e8f0;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .code-block code {
+            background: transparent;
+            color: inherit;
+            padding: 0;
+            border: none;
+            font-size: inherit;
+        }
+
+        .copy-code-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #a0a0a0;
+            padding: 6px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .copy-code-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            transform: scale(1.05);
+        }
+
+        .copy-code-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* 内联代码样式 */
+        .inline-code {
+            background: rgba(99, 102, 241, 0.1);
+            color: #6366f1;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        /* 列表样式 */
+        .message-list {
+            margin: 12px 0;
+            padding-left: 20px;
+        }
+
+        .message-list li {
+            margin: 4px 0;
+            line-height: 1.6;
+        }
+
+        .message-list.ordered {
+            list-style-type: decimal;
+        }
+
+        .message-list:not(.ordered) {
+            list-style-type: disc;
+        }
+
+        .message-list li::marker {
+            color: #6366f1;
+            font-weight: bold;
+        }
+
+        /* 引用块样式 */
+        .message-content blockquote {
+            margin: 12px 0;
+            padding: 12px 16px;
+            border-left: 4px solid #6366f1;
+            background: rgba(99, 102, 241, 0.05);
+            border-radius: 0 8px 8px 0;
+            font-style: italic;
+            color: #4a5568;
+        }
+
+        /* 水平分割线样式 */
+        .message-content hr {
+            margin: 20px 0;
+            border: none;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #e2e8f0, transparent);
+        }
+
+        /* 图片样式 */
+        .message-content .message-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 12px 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            cursor: pointer;
+        }
+
+        .message-content .message-image:hover {
+            transform: scale(1.02);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        /* 图片加载失败样式 */
+        .message-content .message-image[alt]:after {
+            content: " (图片: " attr(alt) ")";
+            color: #666;
+            font-style: italic;
+            display: block;
+            text-align: center;
+            padding: 20px;
+            background: #f8fafc;
+            border: 2px dashed #e2e8f0;
+            border-radius: 8px;
+        }
+
+        /* 表格样式 */
+        .markdown-table {
+            width: 100%;
+            margin: 12px 0;
+            border-collapse: collapse;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            background: #fff;
+        }
+
+        .markdown-table th,
+        .markdown-table td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .markdown-table th {
+            background: #f8fafc;
+            font-weight: 600;
+            color: #374151;
+            border-bottom: 2px solid #d1d5db;
+        }
+
+        .markdown-table tr:hover {
+            background: #f9fafb;
+        }
+
+        .markdown-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* 链接样式 */
+        .message-content a {
+            color: #6366f1;
+            text-decoration: none;
+            border-bottom: 1px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .message-content a:hover {
+            color: #4f46e5;
+            border-bottom-color: #6366f1;
+        }
+
+        /* 删除线样式 */
+        .message-content del {
+            color: #9ca3af;
+            text-decoration: line-through;
+        }
+
         /* 输入区域 */
         .chat-input-container {
             padding: 25px 20px;
@@ -1118,6 +1347,7 @@ export const HTML_CONTENT = `<!DOCTYPE html>
             loadSettings();
             loadModels();
             setupAutoResize();
+            setupImageClickHandlers();
         });
 
         /**
@@ -1321,14 +1551,255 @@ export const HTML_CONTENT = `<!DOCTYPE html>
         }
 
         /**
-         * 处理消息内容（简单的Markdown支持）
+         * 处理消息内容（完整的Markdown支持）
          */
         function processMessageContent(content) {
-            return escapeHtml(content)
-                .replace(/\\*\\*(.*?)\\*\\*/g, '<strong>$1</strong>')
-                .replace(/\\*(.*?)\\*/g, '<em>$1</em>')
-                .replace(/\`(.*?)\`/g, '<code>$1</code>')
-                .replace(/\\n/g, '<br>');
+            // 首先进行HTML转义
+            let html = escapeHtml(content);
+            
+            // 将反引号转换为占位符来避免转义问题
+            html = html.replace(/\`/g, '___BACKTICK___');
+            
+            // 处理代码块（三个反引号占位符）
+            html = html.replace(/___BACKTICK______BACKTICK______BACKTICK___([\\s\\S]*?)___BACKTICK______BACKTICK______BACKTICK___/g, function(match, code) {
+                const lines = code.split('\\n');
+                let language = '';
+                let codeContent = code;
+                
+                // 检查第一行是否是语言标识符
+                if (lines.length > 1 && lines[0].trim() && !lines[0].includes(' ')) {
+                    language = lines[0].trim();
+                    codeContent = lines.slice(1).join('\\n');
+                }
+                
+                return '<div class="code-block">' +
+                    (language ? '<div class="code-language">' + language + '</div>' : '') +
+                    '<pre><code class="language-' + language + '">' + codeContent + '</code></pre>' +
+                    '<button class="copy-code-btn" onclick="copyToClipboard(this)" title="复制代码">📋</button>' +
+                '</div>';
+            });
+            
+            // 处理内联代码（单个反引号占位符）
+            html = html.replace(/___BACKTICK___([^_]+?)___BACKTICK___/g, '<code class="inline-code">$1</code>');
+            
+            // 处理粗体文本
+            html = html.replace(/\\*\\*(.*?)\\*\\*/g, '<strong>$1</strong>');
+            html = html.replace(/__(.+?)__/g, '<strong>$1</strong>');
+            
+            // 处理斜体文本
+            html = html.replace(/\\*([^*]+)\\*/g, '<em>$1</em>');
+            html = html.replace(/_([^_]+)_/g, '<em>$1</em>');
+            
+            // 处理删除线
+            html = html.replace(/~~(.*?)~~/g, '<del>$1</del>');
+            
+            // 处理图片（必须在链接之前处理）
+            html = html.replace(/!\\[([^\\]]*)\\]\\(([^)]+)\\)/g, '<img src="$2" alt="$1" class="message-image" loading="lazy">');
+            
+            // 保护图片和链接的URL，避免被自动链接处理
+            const protectedUrls = [];
+            html = html.replace(/(src="|href=")([^"]+)(")/g, function(match, prefix, url, suffix) {
+                const placeholder = '___PROTECTED_URL_' + protectedUrls.length + '___';
+                protectedUrls.push(url);
+                return prefix + placeholder + suffix;
+            });
+            
+            // 处理链接
+            html = html.replace(/\\[([^\\]]+)\\]\\(([^)]+)\\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+            
+            // 处理自动链接（HTTP/HTTPS）
+            html = html.replace(/(https?:\\/\\/[^\\s<>]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
+            
+            // 恢复保护的URL
+            protectedUrls.forEach((url, index) => {
+                const placeholder = '___PROTECTED_URL_' + index + '___';
+                html = html.replace(placeholder, url);
+            });
+            
+            // 处理标题
+            html = html.replace(/^### (.*$)/gm, '<h3>$1</h3>');
+            html = html.replace(/^## (.*$)/gm, '<h2>$1</h2>');
+            html = html.replace(/^# (.*$)/gm, '<h1>$1</h1>');
+            
+            // 处理无序列表
+            html = html.replace(/^\\* (.+)$/gm, '<li>$1</li>');
+            html = html.replace(/^- (.+)$/gm, '<li>$1</li>');
+            html = html.replace(/^• (.+)$/gm, '<li>$1</li>');
+            
+            // 处理有序列表
+            html = html.replace(/^\\d+\\. (.+)$/gm, '<li class="ordered">$1</li>');
+            
+            // 包装连续的列表项
+            html = html.replace(/(<li[^>]*>.*?<\\/li>\\s*)+/gs, function(match) {
+                if (match.includes('class="ordered"')) {
+                    return '<ol class="message-list ordered">' + match.replace(/ class="ordered"/g, '') + '</ol>';
+                } else {
+                    return '<ul class="message-list">' + match + '</ul>';
+                }
+            });
+            
+            // 处理引用块（需要处理HTML转义后的 &gt;）
+            html = html.replace(/^&gt; (.+)$/gm, '<blockquote>$1</blockquote>');
+            html = html.replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>');
+            
+            // 处理水平分割线
+            html = html.replace(/^-{3,}$/gm, '<hr>');
+            html = html.replace(/^\\*{3,}$/gm, '<hr>');
+            html = html.replace(/^={3,}$/gm, '<hr>');
+            
+            // 处理表格
+            html = processMarkdownTables(html);
+            
+            // 处理换行
+            html = html.replace(/\\n/g, '<br>');
+            
+            return html;
+        }
+
+        /**
+         * 处理Markdown表格
+         */
+        function processMarkdownTables(html) {
+            const lines = html.split('\\n');
+            let inTable = false;
+            let tableRows = [];
+            let result = [];
+            
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].trim();
+                
+                if (line.includes('|') && !inTable) {
+                    // 检查下一行是否是表格分隔符
+                    if (i + 1 < lines.length && lines[i + 1].includes('---')) {
+                        inTable = true;
+                        tableRows = [line];
+                        i++; // 跳过分隔符行
+                        continue;
+                    }
+                } else if (inTable && line.includes('|')) {
+                    tableRows.push(line);
+                } else if (inTable) {
+                    // 表格结束
+                    result.push(createTableHTML(tableRows));
+                    tableRows = [];
+                    inTable = false;
+                    result.push(line);
+                } else {
+                    result.push(line);
+                }
+            }
+            
+            // 处理文件末尾的表格
+            if (inTable && tableRows.length > 0) {
+                result.push(createTableHTML(tableRows));
+            }
+            
+            return result.join('\\n');
+        }
+
+        /**
+         * 创建表格HTML
+         */
+        function createTableHTML(rows) {
+            if (rows.length === 0) return '';
+            
+            const headerRow = rows[0].split('|').map(cell => cell.trim()).filter(cell => cell !== '');
+            const dataRows = rows.slice(1).map(row => 
+                row.split('|').map(cell => cell.trim()).filter(cell => cell !== '')
+            );
+            
+            let table = '<table class="markdown-table">';
+            
+            // 表头
+            table += '<thead><tr>';
+            headerRow.forEach(header => {
+                table += '<th>' + header + '</th>';
+            });
+            table += '</tr></thead>';
+            
+            // 表体
+            table += '<tbody>';
+            dataRows.forEach(row => {
+                table += '<tr>';
+                row.forEach((cell, index) => {
+                    table += '<td>' + (cell || '') + '</td>';
+                });
+                table += '</tr>';
+            });
+            table += '</tbody>';
+            
+            table += '</table>';
+            return table;
+        }
+
+        /**
+         * 复制代码到剪贴板
+         */
+        window.copyToClipboard = function(button) {
+            const codeBlock = button.closest('.code-block');
+            const codeElement = codeBlock.querySelector('code');
+            const text = codeElement.textContent;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                // 临时改变按钮文本以显示反馈
+                const originalText = button.textContent;
+                button.textContent = '✓';
+                button.style.background = '#4CAF50';
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.style.background = '';
+                }, 2000);
+            }).catch(err => {
+                console.error('复制失败:', err);
+                // 显示错误反馈
+                const originalText = button.textContent;
+                button.textContent = '✗';
+                button.style.background = '#f44336';
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.style.background = '';
+                }, 2000);
+            });
+        };
+
+        /**
+         * 图片点击放大功能
+         */
+        function setupImageClickHandlers() {
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('message-image')) {
+                    const imgSrc = e.target.src;
+                    const imgAlt = e.target.alt;
+                    
+                    // 创建模态框
+                    const modal = document.createElement('div');
+                    modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); display: flex; justify-content: center; align-items: center; z-index: 10000; cursor: pointer;';
+                    
+                    const img = document.createElement('img');
+                    img.src = imgSrc;
+                    img.alt = imgAlt;
+                    img.style.cssText = 'max-width: 90%; max-height: 90%; border-radius: 8px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);';
+                    
+                    modal.appendChild(img);
+                    document.body.appendChild(modal);
+                    
+                    // 点击模态框关闭
+                    modal.addEventListener('click', () => {
+                        document.body.removeChild(modal);
+                    });
+                    
+                    // ESC键关闭
+                    const escHandler = (event) => {
+                        if (event.key === 'Escape') {
+                            document.body.removeChild(modal);
+                            document.removeEventListener('keydown', escHandler);
+                        }
+                    };
+                    document.addEventListener('keydown', escHandler);
+                }
+            });
         }
 
         /**
