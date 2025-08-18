@@ -17,12 +17,13 @@
 - **名称**: `CLOUDFLARE_API_TOKEN`
 - **获取方式**: 
   1. 登录 [Cloudflare Dashboard](https://dash.cloudflare.com/profile/api-tokens)
-  2. 点击 "Create Token"
-  3. 使用 "Custom token" 模板
-  4. 配置权限：
-     - Account: `Cloudflare Workers:Edit`
-     - Zone Resources: `Include - All zones` (如果使用自定义域名)
-  5. 复制生成的token
+  2. 点击 "Create Token" → 选择 "Custom token"
+  3. 配置权限：
+     - **Account**: `Cloudflare Workers:Edit`
+     - **Zone** (可选): `Zone:Read` (如果使用自定义域名)
+  4. 复制生成的token
+
+> 📋 **详细权限配置**: 查看 [API权限配置指南](../docs/CF_API_PERMISSIONS.md) 了解完整的权限配置说明
 
 #### CLOUDFLARE_ACCOUNT_ID
 - **名称**: `CLOUDFLARE_ACCOUNT_ID`

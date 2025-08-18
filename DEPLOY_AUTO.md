@@ -13,7 +13,9 @@
 - `CLOUDFLARE_API_TOKEN`: Cloudflare API Token
 - `CLOUDFLARE_ACCOUNT_ID`: Cloudflare Account ID
 
-详细获取方式请参考 [配置文档](.github/README.md)。
+详细获取方式请参考：
+- [配置文档](.github/README.md) - 基础配置
+- [API权限详细指南](docs/CF_API_PERMISSIONS.md) - 完整权限配置说明
 
 ### 2. 发布新版本
 
@@ -117,6 +119,12 @@ npm run get-worker-url
 
 # 验证配置文件
 npm run validate
+
+# 检查GitHub Secrets配置
+npm run check-secrets
+
+# 验证Cloudflare API权限（需要设置环境变量）
+npm run check-cf-permissions
 ```
 
 ## 📝 配置文件说明

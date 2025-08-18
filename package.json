@@ -17,7 +17,9 @@
     "build": "echo 'Build step (if needed) would go here'",
     "status": "wrangler whoami && wrangler d1 info",
     "release": "./scripts/release.sh",
-    "release:patch": "npm run release"
+    "release:patch": "npm run release",
+    "check-secrets": "./scripts/check-secrets.sh",
+    "check-cf-permissions": "./scripts/check-cf-permissions.sh"
   },
   "keywords": [
     "cloudflare",
