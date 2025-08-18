@@ -44,3 +44,4 @@ Thumbs.db
 
 # Cloudflare 相关
 wrangler.toml.bak
+package-lock.json
