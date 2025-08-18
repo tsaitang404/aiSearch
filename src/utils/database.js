@@ -67,12 +67,13 @@ export async function initializeDatabase(db) {
  */
 export async function createUser(db, username, email, passwordHash) {
     try {
+        const userId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
         const result = await db.prepare(`
-            INSERT INTO users (username, email, password_hash)
-            VALUES (?, ?, ?)
-        `).bind(username, email, passwordHash).run();
+            INSERT INTO users (id, username, email, password_hash)
+            VALUES (?, ?, ?, ?)
+        `).bind(userId, username, email, passwordHash).run();
 
-        return { success: true, userId: result.meta.last_row_id };
+        return { success: true, userId: userId };
     } catch (error) {
         console.error('创建用户失败:', error);
         return { success: false, error: error.message };
@@ -101,7 +102,7 @@ export async function findUser(db, identifier) {
 /**
  * 创建用户会话
  * @param {D1Database} db - D1 数据库实例
- * @param {number} userId - 用户ID
+ * @param {string} userId - 用户ID
  * @param {string} sessionId - 会话ID
  * @param {number} expiresIn - 过期时间（秒）
  */
@@ -110,9 +111,9 @@ export async function createSession(db, userId, sessionId, expiresIn = 3600 * 24
         const expiresAt = new Date(Date.now() + expiresIn * 1000).toISOString();
         
         await db.prepare(`
-            INSERT INTO sessions (id, user_id, expires_at)
-            VALUES (?, ?, ?)
-        `).bind(sessionId, userId, expiresAt).run();
+            INSERT INTO user_sessions (id, user_id, token_hash, expires_at)
+            VALUES (?, ?, ?, ?)
+        `).bind(sessionId, userId, sessionId, expiresAt).run();
 
         return { success: true };
     } catch (error) {
@@ -130,7 +131,7 @@ export async function validateSession(db, sessionId) {
     try {
         const result = await db.prepare(`
             SELECT s.*, u.username, u.email 
-            FROM sessions s
+            FROM user_sessions s
             JOIN users u ON s.user_id = u.id
             WHERE s.id = ? AND s.is_active = 1 AND s.expires_at > datetime('now') AND u.is_active = 1
         `).bind(sessionId).first();
@@ -150,7 +151,7 @@ export async function validateSession(db, sessionId) {
 export async function deleteSession(db, sessionId) {
     try {
         await db.prepare(`
-            UPDATE sessions SET is_active = 0 WHERE id = ?
+            UPDATE user_sessions SET is_active = 0 WHERE id = ?
         `).bind(sessionId).run();
 
         return { success: true };
@@ -163,17 +164,18 @@ export async function deleteSession(db, sessionId) {
 /**
  * 保存聊天记录
  * @param {D1Database} db - D1 数据库实例
- * @param {number} userId - 用户ID
- * @param {string} sessionId - 会话ID
+ * @param {string} userId - 用户ID
+ * @param {string} sessionId - 会话ID（暂时不用，因为表中没有这个字段）
  * @param {string} message - 用户消息
  * @param {string} response - AI响应
  */
 export async function saveChatHistory(db, userId, sessionId, message, response) {
     try {
+        const chatId = `chat_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
         await db.prepare(`
-            INSERT INTO chat_history (user_id, session_id, message, response)
+            INSERT INTO chat_history (id, user_id, message, response)
             VALUES (?, ?, ?, ?)
-        `).bind(userId, sessionId, message, response).run();
+        `).bind(chatId, userId, message, response).run();
 
         return { success: true };
     } catch (error) {
@@ -185,7 +187,7 @@ export async function saveChatHistory(db, userId, sessionId, message, response) 
 /**
  * 获取用户聊天历史
  * @param {D1Database} db - D1 数据库实例
- * @param {number} userId - 用户ID
+ * @param {string} userId - 用户ID
  * @param {number} limit - 记录数量限制
  */
 export async function getChatHistory(db, userId, limit = 50) {

@@ -23,7 +23,7 @@
   },
   "keywords": [
     "cloudflare",
-    "worker", 
+    "worker",
     "ai",
     "chatbot",
     "autorag",
@@ -37,7 +37,7 @@
     "url": "https://github.com/tsaitang404/neoai.git"
   },
   "devDependencies": {
-    "wrangler": "^3.30.0"
+    "wrangler": "^3.114.13"
   },
   "engines": {
     "node": ">=18.0.0"
