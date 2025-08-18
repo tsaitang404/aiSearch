@@ -36,10 +36,22 @@ import {
 export async function handleRegister(request, env) {
     try {
         logRequest(request, 'auth/register');
+        
+        console.log('环境变量检查:', Object.keys(env));
+        console.log('DB 绑定状态:', !!env.DB);
 
         if (request.method !== 'POST') {
             return new Response(JSON.stringify({ error: '方法不允许' }), {
                 status: 405,
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            });
+        }
+
+        // 检查数据库连接
+        if (!env.DB) {
+            console.error('数据库未绑定');
+            return new Response(JSON.stringify({ error: '数据库服务不可用' }), {
+                status: 503,
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' }
             });
         }

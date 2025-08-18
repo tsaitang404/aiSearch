@@ -143,7 +143,12 @@ function isValidMethodForAPI(method, pathname) {
     const methodMap = {
         '/api/chat': 'POST',
         '/api/models': 'GET',
-        '/api/health': 'GET'
+        '/api/health': 'GET',
+        '/api/chat-history': 'GET',
+        '/api/auth/register': 'POST',
+        '/api/auth/login': 'POST',
+        '/api/auth/logout': 'POST',
+        '/api/auth/profile': 'GET'
     };
     return methodMap[pathname] === method;
 }

@@ -6,51 +6,29 @@
  */
 
 /**
- * 初始化数据库表
+ * 初始化数据库表 - 检查现有表结构，不重复创建
  * @param {D1Database} db - D1 数据库实例
  */
 export async function initializeDatabase(db) {
     try {
-        // 创建用户表
-        await db.exec(`
-            CREATE TABLE IF NOT EXISTS users (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                username TEXT UNIQUE NOT NULL,
-                email TEXT UNIQUE NOT NULL,
-                password_hash TEXT NOT NULL,
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                is_active BOOLEAN DEFAULT 1
-            )
-        `);
+        console.log('检查数据库连接...');
+        
+        // 检查数据库是否可用
+        if (!db) {
+            throw new Error('数据库未绑定');
+        }
 
-        // 创建会话表
-        await db.exec(`
-            CREATE TABLE IF NOT EXISTS sessions (
-                id TEXT PRIMARY KEY,
-                user_id INTEGER NOT NULL,
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                expires_at DATETIME NOT NULL,
-                is_active BOOLEAN DEFAULT 1,
-                FOREIGN KEY (user_id) REFERENCES users (id)
-            )
-        `);
-
-        // 创建用户聊天记录表
-        await db.exec(`
-            CREATE TABLE IF NOT EXISTS chat_history (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER NOT NULL,
-                session_id TEXT,
-                message TEXT NOT NULL,
-                response TEXT,
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (user_id) REFERENCES users (id),
-                FOREIGN KEY (session_id) REFERENCES sessions (id)
-            )
-        `);
-
-        console.log('数据库表初始化成功');
+        // 检查现有表
+        const tables = await db.prepare(`
+            SELECT name FROM sqlite_master WHERE type='table'
+        `).all();
+        
+        console.log('现有表:', tables.results?.map(t => t.name));
+        
+        // 数据库表已经存在，不需要创建新表
+        // 现有结构：users, user_sessions, chat_history
+        
+        console.log('数据库检查完成');
         return { success: true };
     } catch (error) {
         console.error('数据库初始化失败:', error);

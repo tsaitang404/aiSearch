@@ -11,6 +11,7 @@ binding = "AI"
 binding = "DB"
 database_name = "neoai"
 database_id = "11a6a452-a8b6-4d10-9963-f5a204bd02d0"
+preview_database_id = "11a6a452-a8b6-4d10-9963-f5a204bd02d0"
 
 # 开发环境配置
 [dev]
