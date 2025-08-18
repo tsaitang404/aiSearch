@@ -1,0 +1,58 @@
+name: 自动部署到 Cloudflare Worker
+
+on:
+  push:
+    tags:
+      - 'v*'  # 仅匹配 v* 版本标签
+
+jobs:
+  deploy:
+    name: 部署到 Cloudflare Worker
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+        
+      - name: 设置 Node.js 环境
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          
+      - name: 安装依赖
+        run: npm ci
+        
+      - name: 验证配置
+        run: |
+          echo "验证 wrangler 配置..."
+          npx wrangler validate --config config/wrangler.toml
+          
+      - name: 运行基础检查
+        run: |
+          echo "运行代码检查..."
+          npm run lint
+          
+      - name: 部署到 Cloudflare Worker
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          echo "开始部署到 Cloudflare Worker..."
+          npm run deploy
+          
+      - name: 获取 Worker URL
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          GITHUB_REF_NAME: ${{ github.ref_name }}
+        run: |
+          echo "部署完成，获取 Worker URL..."
+          ./.github/scripts/get-worker-url-ci.sh
+          
+      - name: 部署成功通知
+        run: |
+          echo "🎉 部署成功！"
+          echo "版本: ${{ github.ref_name }}"
+          echo "提交: ${{ github.sha }}"
+          echo "时间: $(date -u)"

@@ -15,7 +15,9 @@
     "lint": "echo 'Running basic validation...' && node -c src/worker/index.js",
     "test": "echo 'Running tests would go here'",
     "build": "echo 'Build step (if needed) would go here'",
-    "status": "wrangler whoami && wrangler d1 info"
+    "status": "wrangler whoami && wrangler d1 info",
+    "release": "./scripts/release.sh",
+    "release:patch": "npm run release"
   },
   "keywords": [
     "cloudflare",
