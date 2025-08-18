@@ -9,6 +9,12 @@ export const HTML_CONTENT = `<!DOCTYPE html>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NeoAI 智能对话</title>
+    <!-- Markdown解析库 -->
+    <script src="https://cdn.jsdelivr.net/npm/marked@12.0.0/marked.min.js"></script>
+    <!-- 代码语法高亮 -->
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
     <style>
         /* 基本样式设置 */
         * {
@@ -469,7 +475,8 @@ export const HTML_CONTENT = `<!DOCTYPE html>
         }
 
         /* 引用块样式 */
-        .message-content blockquote {
+        .message-content blockquote,
+        .message-content .markdown-blockquote {
             margin: 12px 0;
             padding: 12px 16px;
             border-left: 4px solid #6366f1;
@@ -477,6 +484,71 @@ export const HTML_CONTENT = `<!DOCTYPE html>
             border-radius: 0 8px 8px 0;
             font-style: italic;
             color: #4a5568;
+            position: relative;
+        }
+
+        .message-content .markdown-blockquote::before {
+            content: '"';
+            font-size: 3em;
+            color: rgba(99, 102, 241, 0.2);
+            position: absolute;
+            top: -10px;
+            left: 10px;
+            font-family: Georgia, serif;
+        }
+
+        /* 增强Prism.js代码高亮样式 */
+        .code-block pre[class*="language-"] {
+            margin: 0;
+            padding: 16px !important;
+            background: #1a1a1a !important;
+            color: #e2e8f0 !important;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace !important;
+            font-size: 14px !important;
+            line-height: 1.5 !important;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            border: none !important;
+        }
+
+        /* 针对不同语言的特殊处理 */
+        .language-javascript .token.keyword,
+        .language-js .token.keyword,
+        .language-typescript .token.keyword,
+        .language-ts .token.keyword {
+            color: #c792ea !important;
+        }
+
+        .language-python .token.keyword {
+            color: #ff5555 !important;
+        }
+
+        .language-json .token.property {
+            color: #80cbc4 !important;
+        }
+
+        /* 添加行号支持的样式 */
+        .code-block pre.line-numbers {
+            padding-left: 3.8em !important;
+            counter-reset: linenumber;
+        }
+
+        .code-block pre.line-numbers > code {
+            position: relative;
+            white-space: inherit;
+        }
+
+        .code-block .line-numbers-rows {
+            position: absolute;
+            pointer-events: none;
+            top: 0;
+            font-size: 100%;
+            left: -3.8em;
+            width: 3em;
+            letter-spacing: -1px;
+            border-right: 1px solid #444;
+            user-select: none;
         }
 
         /* 水平分割线样式 */
@@ -1348,7 +1420,50 @@ export const HTML_CONTENT = `<!DOCTYPE html>
             loadModels();
             setupAutoResize();
             setupImageClickHandlers();
+            initializeMarkdown();
         });
+
+        /**
+         * 初始化Markdown解析器
+         */
+        function initializeMarkdown() {
+            // 等待marked.js加载完成
+            if (typeof marked === 'undefined') {
+                setTimeout(initializeMarkdown, 100);
+                return;
+            }
+
+            // 配置Prism.js（如果可用）
+            if (typeof Prism !== 'undefined') {
+                // 设置Prism.js自动加载器
+                if (Prism.plugins && Prism.plugins.autoloader) {
+                    Prism.plugins.autoloader.languages_path = 'https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/';
+                }
+                
+                // 禁用自动高亮（我们会手动控制）
+                Prism.manual = true;
+                
+                // 添加自定义语言别名
+                if (Prism.languages) {
+                    // JavaScript别名
+                    if (Prism.languages.javascript) {
+                        Prism.languages.js = Prism.languages.javascript;
+                    }
+                    
+                    // TypeScript别名
+                    if (Prism.languages.typescript) {
+                        Prism.languages.ts = Prism.languages.typescript;
+                    }
+                    
+                    // Python别名
+                    if (Prism.languages.python) {
+                        Prism.languages.py = Prism.languages.python;
+                    }
+                }
+            }
+
+            console.log('Markdown解析器初始化完成');
+        }
 
         /**
          * 初始化DOM元素引用
@@ -1513,9 +1628,21 @@ export const HTML_CONTENT = `<!DOCTYPE html>
             const messageContent = document.createElement('div');
             messageContent.className = 'message-content';
             
-            // 处理消息内容（支持简单的Markdown）
+            // 处理消息内容（支持完整的Markdown）
             const processedContent = processMessageContent(content);
             messageContent.innerHTML = processedContent;
+            
+            // 对代码块进行语法高亮处理
+            if (typeof Prism !== 'undefined') {
+                const codeBlocks = messageContent.querySelectorAll('pre code[class*="language-"]');
+                codeBlocks.forEach(block => {
+                    try {
+                        Prism.highlightElement(block);
+                    } catch (error) {
+                        console.warn('代码高亮失败:', error);
+                    }
+                });
+            }
             
             // 添加时间戳
             const timeDiv = document.createElement('div');
@@ -1551,185 +1678,97 @@ export const HTML_CONTENT = `<!DOCTYPE html>
         }
 
         /**
-         * 处理消息内容（完整的Markdown支持）
+         * 处理消息内容（使用marked.js解析Markdown）
          */
         function processMessageContent(content) {
-            // 首先进行HTML转义
-            let html = escapeHtml(content);
+            // 配置marked选项
+            marked.setOptions({
+                highlight: function(code, lang) {
+                    // 如果Prism.js已加载且支持该语言，使用语法高亮
+                    if (typeof Prism !== 'undefined' && Prism.languages[lang]) {
+                        return Prism.highlight(code, Prism.languages[lang], lang);
+                    }
+                    return escapeHtml(code);
+                },
+                langPrefix: 'language-',
+                breaks: true,  // 支持GitHub风格的换行
+                gfm: true,     // 启用GitHub风格的Markdown
+                tables: true,  // 支持表格
+                sanitize: false,  // 允许HTML（我们稍后会手动清理）
+                smartLists: true,
+                smartypants: false,
+                xhtml: false
+            });
+
+            // 自定义渲染器
+            const renderer = new marked.Renderer();
             
-            // 将反引号转换为占位符来避免转义问题
-            html = html.replace(/\`/g, '___BACKTICK___');
-            
-            // 处理代码块（三个反引号占位符）
-            html = html.replace(/___BACKTICK______BACKTICK______BACKTICK___([\\s\\S]*?)___BACKTICK______BACKTICK______BACKTICK___/g, function(match, code) {
-                const lines = code.split('\\n');
-                let language = '';
-                let codeContent = code;
-                
-                // 检查第一行是否是语言标识符
-                if (lines.length > 1 && lines[0].trim() && !lines[0].includes(' ')) {
-                    language = lines[0].trim();
-                    codeContent = lines.slice(1).join('\\n');
-                }
+            // 自定义代码块渲染
+            renderer.code = function(code, language, escaped) {
+                const validLanguage = language && language.match(/^[a-zA-Z0-9_+-]*$/);
+                const langClass = validLanguage ? 'language-' + language : 'language-text';
+                const langDisplay = validLanguage ? language.toUpperCase() : 'TEXT';
                 
                 return '<div class="code-block">' +
-                    (language ? '<div class="code-language">' + language + '</div>' : '') +
-                    '<pre><code class="language-' + language + '">' + codeContent + '</code></pre>' +
+                    '<div class="code-language">' + langDisplay + '</div>' +
+                    '<pre><code class="' + langClass + '">' + (escaped ? code : escapeHtml(code)) + '</code></pre>' +
                     '<button class="copy-code-btn" onclick="copyToClipboard(this)" title="复制代码">📋</button>' +
                 '</div>';
-            });
-            
-            // 处理内联代码（单个反引号占位符）
-            html = html.replace(/___BACKTICK___([^_]+?)___BACKTICK___/g, '<code class="inline-code">$1</code>');
-            
-            // 处理粗体文本
-            html = html.replace(/\\*\\*(.*?)\\*\\*/g, '<strong>$1</strong>');
-            html = html.replace(/__(.+?)__/g, '<strong>$1</strong>');
-            
-            // 处理斜体文本
-            html = html.replace(/\\*([^*]+)\\*/g, '<em>$1</em>');
-            html = html.replace(/_([^_]+)_/g, '<em>$1</em>');
-            
-            // 处理删除线
-            html = html.replace(/~~(.*?)~~/g, '<del>$1</del>');
-            
-            // 处理图片（必须在链接之前处理）
-            html = html.replace(/!\\[([^\\]]*)\\]\\(([^)]+)\\)/g, '<img src="$2" alt="$1" class="message-image" loading="lazy">');
-            
-            // 保护图片和链接的URL，避免被自动链接处理
-            const protectedUrls = [];
-            html = html.replace(/(src="|href=")([^"]+)(")/g, function(match, prefix, url, suffix) {
-                const placeholder = '___PROTECTED_URL_' + protectedUrls.length + '___';
-                protectedUrls.push(url);
-                return prefix + placeholder + suffix;
-            });
-            
-            // 处理链接
-            html = html.replace(/\\[([^\\]]+)\\]\\(([^)]+)\\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
-            
-            // 处理自动链接（HTTP/HTTPS）
-            html = html.replace(/(https?:\\/\\/[^\\s<>]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
-            
-            // 恢复保护的URL
-            protectedUrls.forEach((url, index) => {
-                const placeholder = '___PROTECTED_URL_' + index + '___';
-                html = html.replace(placeholder, url);
-            });
-            
-            // 处理标题
-            html = html.replace(/^### (.*$)/gm, '<h3>$1</h3>');
-            html = html.replace(/^## (.*$)/gm, '<h2>$1</h2>');
-            html = html.replace(/^# (.*$)/gm, '<h1>$1</h1>');
-            
-            // 处理无序列表
-            html = html.replace(/^\\* (.+)$/gm, '<li>$1</li>');
-            html = html.replace(/^- (.+)$/gm, '<li>$1</li>');
-            html = html.replace(/^• (.+)$/gm, '<li>$1</li>');
-            
-            // 处理有序列表
-            html = html.replace(/^\\d+\\. (.+)$/gm, '<li class="ordered">$1</li>');
-            
-            // 包装连续的列表项
-            html = html.replace(/(<li[^>]*>.*?<\\/li>\\s*)+/gs, function(match) {
-                if (match.includes('class="ordered"')) {
-                    return '<ol class="message-list ordered">' + match.replace(/ class="ordered"/g, '') + '</ol>';
-                } else {
-                    return '<ul class="message-list">' + match + '</ul>';
-                }
-            });
-            
-            // 处理引用块（需要处理HTML转义后的 &gt;）
-            html = html.replace(/^&gt; (.+)$/gm, '<blockquote>$1</blockquote>');
-            html = html.replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>');
-            
-            // 处理水平分割线
-            html = html.replace(/^-{3,}$/gm, '<hr>');
-            html = html.replace(/^\\*{3,}$/gm, '<hr>');
-            html = html.replace(/^={3,}$/gm, '<hr>');
-            
-            // 处理表格
-            html = processMarkdownTables(html);
-            
-            // 处理换行
-            html = html.replace(/\\n/g, '<br>');
-            
-            return html;
-        }
+            };
 
-        /**
-         * 处理Markdown表格
-         */
-        function processMarkdownTables(html) {
-            const lines = html.split('\\n');
-            let inTable = false;
-            let tableRows = [];
-            let result = [];
-            
-            for (let i = 0; i < lines.length; i++) {
-                const line = lines[i].trim();
+            // 自定义内联代码渲染
+            renderer.codespan = function(code) {
+                return '<code class="inline-code">' + escapeHtml(code) + '</code>';
+            };
+
+            // 自定义表格渲染
+            renderer.table = function(header, body) {
+                return '<table class="markdown-table">' +
+                    '<thead>' + header + '</thead>' +
+                    '<tbody>' + body + '</tbody>' +
+                '</table>';
+            };
+
+            // 自定义链接渲染（添加安全属性）
+            renderer.link = function(href, title, text) {
+                // 验证链接安全性
+                const isExternal = href.startsWith('http://') || href.startsWith('https://');
+                const titleAttr = title ? ' title="' + escapeHtml(title) + '"' : '';
+                const targetAttr = isExternal ? ' target="_blank" rel="noopener noreferrer"' : '';
                 
-                if (line.includes('|') && !inTable) {
-                    // 检查下一行是否是表格分隔符
-                    if (i + 1 < lines.length && lines[i + 1].includes('---')) {
-                        inTable = true;
-                        tableRows = [line];
-                        i++; // 跳过分隔符行
-                        continue;
-                    }
-                } else if (inTable && line.includes('|')) {
-                    tableRows.push(line);
-                } else if (inTable) {
-                    // 表格结束
-                    result.push(createTableHTML(tableRows));
-                    tableRows = [];
-                    inTable = false;
-                    result.push(line);
-                } else {
-                    result.push(line);
-                }
-            }
-            
-            // 处理文件末尾的表格
-            if (inTable && tableRows.length > 0) {
-                result.push(createTableHTML(tableRows));
-            }
-            
-            return result.join('\\n');
-        }
+                return '<a href="' + escapeHtml(href) + '"' + titleAttr + targetAttr + '>' + text + '</a>';
+            };
 
-        /**
-         * 创建表格HTML
-         */
-        function createTableHTML(rows) {
-            if (rows.length === 0) return '';
-            
-            const headerRow = rows[0].split('|').map(cell => cell.trim()).filter(cell => cell !== '');
-            const dataRows = rows.slice(1).map(row => 
-                row.split('|').map(cell => cell.trim()).filter(cell => cell !== '')
-            );
-            
-            let table = '<table class="markdown-table">';
-            
-            // 表头
-            table += '<thead><tr>';
-            headerRow.forEach(header => {
-                table += '<th>' + header + '</th>';
-            });
-            table += '</tr></thead>';
-            
-            // 表体
-            table += '<tbody>';
-            dataRows.forEach(row => {
-                table += '<tr>';
-                row.forEach((cell, index) => {
-                    table += '<td>' + (cell || '') + '</td>';
-                });
-                table += '</tr>';
-            });
-            table += '</tbody>';
-            
-            table += '</table>';
-            return table;
+            // 自定义图片渲染
+            renderer.image = function(href, title, text) {
+                const titleAttr = title ? ' title="' + escapeHtml(title) + '"' : '';
+                const altAttr = text ? ' alt="' + escapeHtml(text) + '"' : '';
+                
+                return '<img src="' + escapeHtml(href) + '" class="message-image" loading="lazy"' + titleAttr + altAttr + '>';
+            };
+
+            // 自定义引用块渲染
+            renderer.blockquote = function(quote) {
+                return '<blockquote class="markdown-blockquote">' + quote + '</blockquote>';
+            };
+
+            // 使用自定义渲染器
+            marked.setOptions({ renderer: renderer });
+
+            try {
+                // 使用marked.js解析Markdown
+                let html = marked.parse(content);
+                
+                // 后处理：添加列表样式类
+                html = html.replace(/<ul>/g, '<ul class="message-list">');
+                html = html.replace(/<ol>/g, '<ol class="message-list ordered">');
+                
+                return html;
+            } catch (error) {
+                console.error('Markdown解析错误:', error);
+                // 如果解析失败，回退到简单的HTML转义
+                return escapeHtml(content).replace(/\\n/g, '<br>');
+            }
         }
 
         /**
