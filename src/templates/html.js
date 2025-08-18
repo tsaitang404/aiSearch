@@ -1655,6 +1655,7 @@ export const HTML_CONTENT = `<!DOCTYPE html>
          * 初始化应用
          */
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('页面DOM加载完成，开始初始化应用...');
             initializeElements();
             setupEventListeners();
             loadSettings();
@@ -1663,6 +1664,7 @@ export const HTML_CONTENT = `<!DOCTYPE html>
             setupImageClickHandlers();
             initializeMarkdown();
             checkUserAuth(); // 检查用户登录状态
+            console.log('应用初始化完成');
         });
 
         /**
@@ -1947,8 +1949,13 @@ export const HTML_CONTENT = `<!DOCTYPE html>
 
         /**
          * 添加消息到聊天界面
+         * @param {string} role - 消息角色 ('user' 或 'assistant')
+         * @param {string} content - 消息内容
+         * @param {Date|null} timestamp - 消息时间戳（可选）
+         * @param {Array} sources - 来源信息（可选）
+         * @param {string} model - 模型信息（可选）
          */
-        function addMessage(role, content, sources = [], model = '') {
+        function addMessage(role, content, timestamp = null, sources = [], model = '') {
             // 移除欢迎消息
             const welcomeMessage = document.querySelector('.welcome-message');
             if (welcomeMessage) {
@@ -1956,7 +1963,7 @@ export const HTML_CONTENT = `<!DOCTYPE html>
             }
             
             const messageDiv = document.createElement('div');
-            messageDiv.className = \`message \${role}\`;
+            messageDiv.className = 'message ' + role;
             
             const avatar = document.createElement('div');
             avatar.className = 'message-avatar';
@@ -2633,6 +2640,7 @@ export const HTML_CONTENT = `<!DOCTYPE html>
          */
         async function checkUserAuth() {
             try {
+                console.log('检查用户认证状态...');
                 const response = await fetch('/api/auth/profile', {
                     method: 'GET',
                     credentials: 'include'
@@ -2641,13 +2649,15 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                 if (response.ok) {
                     const data = await response.json();
                     if (data.success) {
+                        console.log('用户已登录:', data.user.username);
                         currentUser = data.user;
-                        updateAuthUI(true);
+                        await updateAuthUI(true);
                         return;
                     }
                 }
                 
                 // 用户未登录
+                console.log('用户未登录');
                 currentUser = null;
                 updateAuthUI(false);
             } catch (error) {
@@ -2660,16 +2670,22 @@ export const HTML_CONTENT = `<!DOCTYPE html>
          * 更新认证UI状态
          * @param {boolean} isLoggedIn - 是否已登录
          */
-        function updateAuthUI(isLoggedIn) {
+        async function updateAuthUI(isLoggedIn) {
             if (isLoggedIn && currentUser) {
                 // 已登录状态
                 userInfo.classList.remove('hidden');
                 authButtons.classList.add('hidden');
                 document.getElementById('username').textContent = currentUser.username;
+                
+                // 加载用户的历史聊天记录
+                await loadChatHistory();
             } else {
                 // 未登录状态
                 userInfo.classList.add('hidden');
                 authButtons.classList.remove('hidden');
+                
+                // 清除历史记录，只保留欢迎消息
+                clearChatHistory();
             }
         }
 
@@ -2862,6 +2878,94 @@ export const HTML_CONTENT = `<!DOCTYPE html>
             // 由于我们使用Cookie认证，浏览器会自动包含cookies
             
             return headers;
+        }
+
+        // ==================== 聊天历史记录相关函数 ====================
+
+        /**
+         * 加载用户聊天历史记录
+         */
+        async function loadChatHistory() {
+            if (!currentUser) {
+                console.log('用户未登录，跳过加载历史记录');
+                return;
+            }
+
+            try {
+                console.log('开始加载聊天历史记录...');
+                
+                const response = await fetch('/api/chat-history', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+
+                console.log('历史记录请求状态:', response.status);
+
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('历史记录响应数据:', data);
+                    
+                    if (data.success && data.history && data.history.length > 0) {
+                        console.log('准备显示历史记录，共 ' + data.history.length + ' 条');
+                        displayChatHistory(data.history);
+                        console.log('历史记录显示完成');
+                    } else {
+                        console.log('没有找到历史记录或历史记录为空');
+                    }
+                } else {
+                    const errorText = await response.text();
+                    console.log('无法加载历史记录, HTTP状态码:', response.status, '错误信息:', errorText);
+                }
+            } catch (error) {
+                console.error('加载聊天历史失败:', error);
+            }
+        }
+
+        /**
+         * 显示聊天历史记录
+         * @param {Array} history - 历史记录数组
+         */
+        function displayChatHistory(history) {
+            console.log('开始显示聊天历史记录，共 ' + history.length + ' 条');
+            
+            // 清除现有的聊天消息（保留欢迎消息）
+            const welcomeMessage = chatMessages.querySelector('.welcome-message');
+            chatMessages.innerHTML = '';
+            if (welcomeMessage) {
+                chatMessages.appendChild(welcomeMessage);
+            }
+
+            // 按时间顺序显示历史记录（从旧到新）
+            history.reverse().forEach((record, index) => {
+                if (record.message && record.response) {
+                    console.log('显示第 ' + (index + 1) + ' 条记录:', record.message.substring(0, 50) + '...');
+                    // 添加用户消息
+                    addMessage('user', record.message, [], '', new Date(record.created_at));
+                    // 添加AI响应
+                    addMessage('assistant', record.response, [], '', new Date(record.created_at));
+                }
+            });
+
+            // 滚动到底部
+            console.log('聊天历史记录显示完成，滚动到底部');
+            scrollToBottomSmooth();
+        }
+
+        /**
+         * 清除聊天历史（保留欢迎消息）
+         */
+        function clearChatHistory() {
+            const welcomeMessage = chatMessages.querySelector('.welcome-message');
+            chatMessages.innerHTML = '';
+            if (welcomeMessage) {
+                chatMessages.appendChild(welcomeMessage);
+            } else {
+                // 重新创建欢迎消息
+                const welcomeDiv = document.createElement('div');
+                welcomeDiv.className = 'welcome-message';
+                welcomeDiv.innerHTML = '<h2>欢迎使用 NeoAI</h2><p>我是您的智能助手，可以回答问题、协助思考和提供信息。有什么我可以帮您的吗？</p>';
+                chatMessages.appendChild(welcomeDiv);
+            }
         }
     </script>
 </body>
