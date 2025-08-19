@@ -1928,16 +1928,16 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                 
                 if (response.ok) {
                     // 添加AI回复
-                    addMessage('assistant', data.response, data.sources, data.model);
+                    addMessage('assistant', data.response, null, data.sources, data.model);
                     updateModelBadge(data.model);
                 } else {
                     // 显示错误消息
-                    addMessage('assistant', \`抱歉，处理您的请求时出现了错误：\${data.error}\`, [], '错误');
+                    addMessage('assistant', '抱歉，处理您的请求时出现了错误：' + data.error, null, [], '错误');
                 }
                 
             } catch (error) {
                 console.error('发送消息失败:', error);
-                addMessage('assistant', '抱歉，网络连接出现问题，请稍后再试。', [], '错误');
+                addMessage('assistant', '抱歉，网络连接出现问题，请稍后再试。', null, [], '错误');
             }
             
             // 隐藏打字指示器
@@ -1991,7 +1991,8 @@ export const HTML_CONTENT = `<!DOCTYPE html>
             // 添加时间戳
             const timeDiv = document.createElement('div');
             timeDiv.className = 'message-time';
-            timeDiv.textContent = new Date().toLocaleTimeString('zh-CN', {
+            const displayTime = timestamp || new Date();
+            timeDiv.textContent = displayTime.toLocaleTimeString('zh-CN', {
                 hour: '2-digit',
                 minute: '2-digit'
             });
@@ -2005,12 +2006,9 @@ export const HTML_CONTENT = `<!DOCTYPE html>
             if (sources && sources.length > 0) {
                 const sourcesDiv = document.createElement('div');
                 sourcesDiv.className = 'message-sources';
-                sourcesDiv.innerHTML = \`
-                    <strong>参考来源:</strong>
-                    <ul>
-                        \${sources.map(source => \`<li>\${escapeHtml(source)}</li>\`).join('')}
-                    </ul>
-                \`;
+                sourcesDiv.innerHTML = '<strong>参考来源:</strong><ul>' + 
+                    sources.map(source => '<li>' + escapeHtml(source) + '</li>').join('') + 
+                    '</ul>';
                 contentWrapper.appendChild(sourcesDiv);
             }
             
@@ -2940,9 +2938,9 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                 if (record.message && record.response) {
                     console.log('显示第 ' + (index + 1) + ' 条记录:', record.message.substring(0, 50) + '...');
                     // 添加用户消息
-                    addMessage('user', record.message, [], '', new Date(record.created_at));
+                    addMessage('user', record.message, new Date(record.created_at), [], '');
                     // 添加AI响应
-                    addMessage('assistant', record.response, [], '', new Date(record.created_at));
+                    addMessage('assistant', record.response, new Date(record.created_at), [], '');
                 }
             });
 
