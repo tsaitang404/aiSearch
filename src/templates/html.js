@@ -42,30 +42,46 @@ export const HTML_CONTENT = `<!DOCTYPE html>
         .header {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(20px);
-            padding: 20px 30px;
+            padding: 16px 24px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 24px rgba(0, 0, 0, 0.08);
             border-bottom: 1px solid rgba(255, 255, 255, 0.2);
             position: sticky;
             top: 0;
             z-index: 100;
+            min-height: 72px;
+        }
+
+        .header-left {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex: 1;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
         }
 
         .header h1 {
             margin: 0;
-            color: #2d3748;
-            font-size: 24px;
+            color: #1a202c;
+            font-size: 22px;
             font-weight: 700;
             display: flex;
             align-items: center;
             gap: 10px;
+            line-height: 1.2;
         }
 
         .header h1::before {
             content: "🤖";
-            font-size: 28px;
+            font-size: 24px;
             animation: bounce 2s infinite;
         }
 
@@ -78,22 +94,32 @@ export const HTML_CONTENT = `<!DOCTYPE html>
         .model-indicator {
             display: flex;
             align-items: center;
-            gap: 12px;
-            font-size: 14px;
-            color: #4a5568;
-            background: rgba(255, 255, 255, 0.8);
-            padding: 8px 16px;
-            border-radius: 25px;
+            gap: 8px;
+            font-size: 13px;
+            color: #64748b;
+            background: rgba(248, 250, 252, 0.9);
+            padding: 6px 12px;
+            border-radius: 20px;
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(226, 232, 240, 0.5);
             transition: all 0.3s ease;
             cursor: pointer;
+            max-width: 200px;
+            white-space: nowrap;
+            flex-shrink: 2;
+            min-width: 0;
+            overflow: hidden;
+        }
+        
+        .model-indicator span:first-child {
+            flex-shrink: 0;
         }
 
         .model-indicator:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            background: rgba(255, 255, 255, 0.9);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            background: rgba(255, 255, 255, 0.95);
+            border-color: rgba(102, 126, 234, 0.3);
         }
 
         .model-indicator:active {
@@ -112,6 +138,9 @@ export const HTML_CONTENT = `<!DOCTYPE html>
             letter-spacing: 0.5px;
             box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
             animation: pulse 3s infinite;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 120px;
         }
 
         @keyframes pulse {
@@ -157,6 +186,7 @@ export const HTML_CONTENT = `<!DOCTYPE html>
             gap: 10px;
             color: #2d3748;
             font-size: 14px;
+            flex-shrink: 0;
         }
 
         .user-info .username {
@@ -166,6 +196,7 @@ export const HTML_CONTENT = `<!DOCTYPE html>
         .auth-buttons {
             display: flex;
             gap: 10px;
+            flex-shrink: 0;
         }
 
         .auth-btn {
@@ -324,10 +355,11 @@ export const HTML_CONTENT = `<!DOCTYPE html>
             flex: 1;
             display: flex;
             flex-direction: column;
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
             width: 100%;
-            padding: 0 20px;
+            padding: 0 16px;
+            min-height: 0;
         }
 
         /* 聊天消息区域 */
@@ -335,12 +367,12 @@ export const HTML_CONTENT = `<!DOCTYPE html>
             flex: 1;
             overflow-y: auto;
             overflow-x: hidden;
-            padding: 20px 0;
+            padding: 24px 0;
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 16px;
             min-height: 0;
-            max-height: calc(100vh - 200px);
+            max-height: calc(100vh - 180px);
             scroll-behavior: smooth;
         }
 
@@ -367,16 +399,16 @@ export const HTML_CONTENT = `<!DOCTYPE html>
         /* 消息样式 */
         .message {
             display: flex;
-            gap: 15px;
-            max-width: 85%;
-            animation: messageSlideIn 0.5s ease-out;
-            margin-bottom: 24px;
+            gap: 12px;
+            max-width: 80%;
+            animation: messageSlideIn 0.4s ease-out;
+            margin-bottom: 20px;
         }
 
         @keyframes messageSlideIn {
             from { 
                 opacity: 0; 
-                transform: translateY(20px) scale(0.95); 
+                transform: translateY(12px) scale(0.98); 
             }
             to { 
                 opacity: 1; 
@@ -394,16 +426,16 @@ export const HTML_CONTENT = `<!DOCTYPE html>
         }
 
         .message-avatar {
-            width: 42px;
-            height: 42px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 700;
-            font-size: 14px;
+            font-weight: 600;
+            font-size: 13px;
             flex-shrink: 0;
-            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
             position: relative;
         }
 
@@ -434,45 +466,42 @@ export const HTML_CONTENT = `<!DOCTYPE html>
         }
 
         .message-content {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 16px 20px;
-            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.98);
+            padding: 14px 18px;
+            border-radius: 18px;
             backdrop-filter: blur(15px);
             border: 1px solid rgba(255, 255, 255, 0.3);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
             position: relative;
-            line-height: 1.6;
-            transition: all 0.3s ease;
+            line-height: 1.5;
+            transition: all 0.2s ease;
             word-wrap: break-word;
         }
 
         .message-content:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
         }
 
         .message.user .message-content {
             background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
             border: none;
+            box-shadow: 0 2px 12px rgba(102, 126, 234, 0.25);
         }
 
         .message.user .message-content:hover {
-            box-shadow: 0 6px 25px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 4px 16px rgba(102, 126, 234, 0.35);
         }
 
         .message.assistant .message-content {
             background: rgba(255, 255, 255, 0.98);
             color: #2d3748;
+            border: 1px solid rgba(226, 232, 240, 0.6);
         }
 
         .message.assistant .message-content:hover {
-            box-shadow: 0 6px 25px rgba(16, 185, 129, 0.2);
-        }
-
-        .message.assistant .message-content {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 16px rgba(16, 185, 129, 0.15);
         }
 
         /* 消息时间戳 */
@@ -811,53 +840,48 @@ export const HTML_CONTENT = `<!DOCTYPE html>
 
         /* 输入区域 */
         .chat-input-container {
-            padding: 25px 20px;
-            background: rgba(255, 255, 255, 0.95);
+            padding: 20px 16px;
+            background: rgba(255, 255, 255, 0.98);
             backdrop-filter: blur(20px);
-            border-top: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 25px 25px 0 0;
+            border-top: 1px solid rgba(226, 232, 240, 0.6);
+            border-radius: 20px 20px 0 0;
             position: sticky;
             bottom: 0;
             z-index: 100;
-            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.08);
         }
 
         .chat-input-wrapper {
             display: flex;
-            gap: 15px;
+            gap: 12px;
             align-items: flex-end;
-            padding: 0;
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
         }
 
         .chat-input {
             flex: 1;
-            border: 2px solid rgba(255, 255, 255, 0.5);
-            border-radius: 25px;
-            padding: 16px 20px;
+            border: 2px solid rgba(226, 232, 240, 0.8);
+            border-radius: 20px;
+            padding: 12px 18px;
             font-size: 16px;
             outline: none;
             transition: all 0.3s ease;
             resize: none;
             min-height: 24px;
-            max-height: 120px;
+            max-height: 100px;
             background: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(10px);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
             font-family: inherit;
             overflow-y: auto;
+            line-height: 1.5;
         }
 
         .chat-input:focus {
             border-color: #667eea;
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
-            transform: translateY(-2px);
-        }
-
-        .chat-input::placeholder {
-            color: #a0aec0;
-            font-style: italic;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+            transform: translateY(-1px);
         }
 
         .send-btn {
@@ -865,39 +889,22 @@ export const HTML_CONTENT = `<!DOCTYPE html>
             color: white;
             border: none;
             border-radius: 50%;
-            width: 52px;
-            height: 52px;
+            width: 48px;
+            height: 48px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
             flex-shrink: 0;
-            font-size: 20px;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .send-btn::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            transition: all 0.3s ease;
-            transform: translate(-50%, -50%);
+            font-size: 18px;
+            box-shadow: 0 3px 12px rgba(102, 126, 234, 0.3);
         }
         
         .send-btn:hover:not(:disabled) {
-            transform: translateY(-3px) scale(1.05);
-            box-shadow: 0 6px 25px rgba(102, 126, 234, 0.5);
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
         }
-
-        .send-btn:hover:not(:disabled)::before {
             width: 100%;
             height: 100%;
         }
@@ -916,12 +923,18 @@ export const HTML_CONTENT = `<!DOCTYPE html>
         .typing-indicator {
             display: flex;
             align-items: center;
-            gap: 15px;
-            padding: 20px;
-            margin: 10px 0;
+            gap: 12px;
+            padding: 12px 18px;
+            margin: 8px 16px;
             opacity: 0;
-            transform: translateY(20px);
+            transform: translateY(10px);
             transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 18px;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(226, 232, 240, 0.6);
+            max-width: 200px;
         }
 
         .typing-indicator.show {
@@ -930,27 +943,30 @@ export const HTML_CONTENT = `<!DOCTYPE html>
         }
 
         .typing-indicator .message-avatar {
+            width: 32px;
+            height: 32px;
+            font-size: 12px;
             background: linear-gradient(135deg, #10b981, #059669);
-            box-shadow: 0 3px 15px rgba(16, 185, 129, 0.3);
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
             animation: avatarPulse 2s infinite;
         }
 
         .typing-dots {
             display: flex;
-            gap: 6px;
-            padding: 12px 18px;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            backdrop-filter: blur(15px);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            gap: 4px;
+            padding: 0;
+            background: transparent;
+            border-radius: 0;
+            backdrop-filter: none;
+            box-shadow: none;
         }
 
         .typing-dot {
-            width: 8px;
-            height: 8px;
+            width: 6px;
+            height: 6px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            animation: typing 1.5s ease-in-out infinite;
+            background: #10b981;
+            animation: typing 1.4s ease-in-out infinite;
         }
 
         .typing-dot:nth-child(2) {
@@ -967,9 +983,9 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                 opacity: 0.4;
             }
             30% {
-                transform: translateY(-8px);
+                transform: translateY(-6px);
                 opacity: 1;
-                background: linear-gradient(135deg, #10b981, #059669);
+                background: #059669;
             }
         }
 
@@ -1061,6 +1077,84 @@ export const HTML_CONTENT = `<!DOCTYPE html>
 
         /* 响应式设计 */
         @media (max-width: 768px) {
+            .header {
+                padding: 12px 16px;
+                min-height: 64px;
+            }
+            
+            .header-left {
+                gap: 4px;
+            }
+            
+            .header h1 {
+                font-size: 18px;
+            }
+            
+            .header-right {
+                gap: 8px;
+                flex-wrap: wrap;
+            }
+            
+            .model-indicator {
+                font-size: 12px;
+                padding: 4px 8px;
+                gap: 6px;
+                max-width: 160px;
+            }
+            
+            .model-badge {
+                font-size: 10px;
+                padding: 2px 8px;
+            }
+            
+            .chat-container {
+                padding: 0 12px;
+            }
+            
+            .chat-messages {
+                padding: 16px 0;
+                gap: 12px;
+                max-height: calc(100vh - 160px);
+            }
+            
+            .message {
+                max-width: 90%;
+                gap: 10px;
+                margin-bottom: 16px;
+            }
+            
+            .message-avatar {
+                width: 32px;
+                height: 32px;
+                font-size: 12px;
+            }
+            
+            .message-content {
+                padding: 12px 16px;
+                border-radius: 16px;
+            }
+            
+            .chat-input-container {
+                padding: 16px 12px;
+                border-radius: 16px 16px 0 0;
+            }
+            
+            .chat-input-wrapper {
+                gap: 10px;
+            }
+            
+            .chat-input {
+                border-radius: 18px;
+                padding: 10px 16px;
+                font-size: 16px;
+            }
+            
+            .send-btn {
+                width: 44px;
+                height: 44px;
+                font-size: 16px;
+            }
+            
             .settings-panel {
                 width: 100vw;
                 right: -100vw;
@@ -1070,46 +1164,108 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                 right: 0;
             }
             
-            .message {
-                max-width: 95%;
-                gap: 12px;
-            }
-            
-            .message-avatar {
-                width: 36px;
-                height: 36px;
-                font-size: 12px;
-            }
-            
-            .header {
-                padding: 15px 20px;
-            }
-            
-            .header h1 {
-                font-size: 20px;
-            }
-            
-            .chat-container {
-                padding: 0 15px;
+            .auth-form {
+                margin: 20px;
+                padding: 32px;
+                max-width: calc(100vw - 40px);
             }
         }
 
         @media (max-width: 480px) {
+            .header {
+                padding: 10px 12px;
+                min-height: 60px;
+            }
+            
+            .header-right {
+                gap: 4px;
+                flex-wrap: wrap;
+                justify-content: flex-end;
+                width: auto;
+                max-width: calc(100vw - 200px);
+            }
+            
             .header h1 {
-                font-size: 18px;
+                font-size: 16px;
+            }
+            
+            .header h1::before {
+                font-size: 20px;
             }
             
             .model-indicator {
+                font-size: 10px;
+                max-width: 80px;
+                padding: 2px 6px;
+                order: 4;
+                flex-shrink: 2;
+            }
+            
+            .model-indicator span:first-child {
+                display: none;
+            }
+            
+            .user-info {
+                font-size: 11px;
+                order: 1;
+                flex-basis: 100%;
+                margin-bottom: 2px;
+            }
+            
+            .auth-buttons {
+                order: 2;
+                gap: 4px;
+                flex-shrink: 0;
+            }
+            
+            .auth-btn {
+                padding: 6px 12px;
                 font-size: 12px;
-                gap: 8px;
+            }
+            
+            .settings-btn {
+                order: 3;
+                width: 32px;
+                height: 32px;
+                font-size: 12px;
+                flex-shrink: 0;
+            }
+            
+            .chat-container {
+                padding: 0 8px;
+            }
+            
+            .message {
+                max-width: 95%;
             }
             
             .message-content {
-                padding: 12px 16px;
+                padding: 10px 14px;
+                border-radius: 14px;
             }
             
             .chat-input-container {
-                padding: 20px 0;
+                padding: 12px 8px;
+            }
+            
+            .chat-input {
+                padding: 8px 14px;
+                border-radius: 16px;
+            }
+            
+            .send-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 14px;
+            }
+            
+            .welcome-message {
+                padding: 40px 20px;
+                margin: 20px auto;
+            }
+            
+            .welcome-message h2 {
+                font-size: 24px;
             }
         }
 
@@ -1121,33 +1277,62 @@ export const HTML_CONTENT = `<!DOCTYPE html>
         /* 欢迎消息 */
         .welcome-message {
             text-align: center;
-            padding: 60px 30px;
-            color: rgba(255, 255, 255, 0.9);
-            animation: welcomeFadeIn 1s ease-out;
+            padding: 48px 24px;
+            color: rgba(255, 255, 255, 0.95);
+            animation: welcomeFadeIn 0.8s ease-out;
             max-width: 600px;
-            margin: 40px auto;
+            margin: 32px auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         @keyframes welcomeFadeIn {
             from {
                 opacity: 0;
-                transform: translateY(30px);
+                transform: translateY(20px) scale(0.98);
             }
             to {
                 opacity: 1;
-                transform: translateY(0);
+                transform: translateY(0) scale(1);
             }
         }
 
         .welcome-message h2 {
             color: white;
-            margin-bottom: 20px;
-            font-size: 32px;
+            margin-bottom: 16px;
+            font-size: 28px;
             font-weight: 700;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
             display: flex;
             align-items: center;
             justify-content: center;
+            gap: 12px;
+        }
+
+        .welcome-message h2::before {
+            content: "✨";
+            font-size: 32px;
+            animation: sparkle 2s ease-in-out infinite;
+        }
+
+        @keyframes sparkle {
+            0%, 100% { 
+                transform: rotate(0deg) scale(1);
+                filter: brightness(1);
+            }
+            50% { 
+                transform: rotate(10deg) scale(1.1);
+                filter: brightness(1.2);
+            }
+        }
+
+        .welcome-message p {
+            font-size: 16px;
+            line-height: 1.6;
+            opacity: 0.9;
+        }
             gap: 15px;
         }
 
@@ -1459,12 +1644,12 @@ export const HTML_CONTENT = `<!DOCTYPE html>
     <div class="header">
         <div class="header-left">
             <h1>NeoAI 智能对话</h1>
+        </div>
+        <div class="header-right">
             <div class="model-indicator">
                 <span>当前模型:</span>
                 <span class="model-badge" id="currentModelBadge">AutoRAG</span>
             </div>
-        </div>
-        <div class="header-right">
             <!-- 已登录用户信息 -->
             <div id="userInfo" class="user-info hidden">
                 <span>👋 您好, <span class="username" id="username"></span></span>
