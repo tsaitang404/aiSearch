@@ -2908,14 +2908,17 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                         displayChatHistory(data.history);
                         console.log('历史记录显示完成');
                     } else {
-                        console.log('没有找到历史记录或历史记录为空');
+                        console.log('没有找到历史记录或历史记录为空，显示欢迎消息');
+                        showWelcomeMessage();
                     }
                 } else {
                     const errorText = await response.text();
                     console.log('无法加载历史记录, HTTP状态码:', response.status, '错误信息:', errorText);
+                    showWelcomeMessage();
                 }
             } catch (error) {
                 console.error('加载聊天历史失败:', error);
+                showWelcomeMessage();
             }
         }
 
@@ -2926,12 +2929,9 @@ export const HTML_CONTENT = `<!DOCTYPE html>
         function displayChatHistory(history) {
             console.log('开始显示聊天历史记录，共 ' + history.length + ' 条');
             
-            // 清除现有的聊天消息（保留欢迎消息）
-            const welcomeMessage = chatMessages.querySelector('.welcome-message');
+            // 直接清空聊天容器，不保留欢迎消息
+            // 因为有历史记录时不应该显示欢迎消息
             chatMessages.innerHTML = '';
-            if (welcomeMessage) {
-                chatMessages.appendChild(welcomeMessage);
-            }
 
             // 按时间顺序显示历史记录（从旧到新）
             history.reverse().forEach((record, index) => {
@@ -2950,20 +2950,21 @@ export const HTML_CONTENT = `<!DOCTYPE html>
         }
 
         /**
+         * 显示欢迎消息
+         */
+        function showWelcomeMessage() {
+            chatMessages.innerHTML = '';
+            const welcomeDiv = document.createElement('div');
+            welcomeDiv.className = 'welcome-message';
+            welcomeDiv.innerHTML = '<h2>欢迎使用 NeoAI</h2><p>我是您的智能助手，可以回答问题、协助思考和提供信息。有什么我可以帮您的吗？</p>';
+            chatMessages.appendChild(welcomeDiv);
+        }
+
+        /**
          * 清除聊天历史（保留欢迎消息）
          */
         function clearChatHistory() {
-            const welcomeMessage = chatMessages.querySelector('.welcome-message');
-            chatMessages.innerHTML = '';
-            if (welcomeMessage) {
-                chatMessages.appendChild(welcomeMessage);
-            } else {
-                // 重新创建欢迎消息
-                const welcomeDiv = document.createElement('div');
-                welcomeDiv.className = 'welcome-message';
-                welcomeDiv.innerHTML = '<h2>欢迎使用 NeoAI</h2><p>我是您的智能助手，可以回答问题、协助思考和提供信息。有什么我可以帮您的吗？</p>';
-                chatMessages.appendChild(welcomeDiv);
-            }
+            showWelcomeMessage();
         }
     </script>
 </body>
